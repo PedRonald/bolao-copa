@@ -469,7 +469,6 @@
     .trophy-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
     .trophy-card { min-width: 0; }
     
-    /* Correção responsiva adaptável baseada em bloco para Palpites */
     .palpites-header { display: none; }
     .palpite-row { 
       grid-template-columns: 1fr; 
@@ -768,36 +767,50 @@ dbRef.on('value', (snapshot) => {
     };
   }
   renderAll();
-  document.getElementById('cfg-valor').value = state.valorEntrada || 0;
+  const cfgValEl = document.getElementById('cfg-valor');
+  if (cfgValEl) cfgValEl.value = state.valorEntrada || 0;
   document.getElementById('loading').style.display = 'none';
 });
 
-// ─── INIT ───
-document.getElementById('jogo-data').valueAsDate = new Date();
+// ─── EVENT LISTENERS SECURE INITIALIZATION ───
+document.addEventListener("DOMContentLoaded", () => {
+  const jogoDataEl = document.getElementById('jogo-data');
+  if (jogoDataEl) jogoDataEl.valueAsDate = new Date();
 
-document.getElementById('palpite-jogo').addEventListener('change', () => {
-  const jogoId = document.getElementById('palpite-jogo').value;
-  const row = document.getElementById('palpite-placar-row');
-  if (!jogoId) { row.style.display = 'none'; return; }
-  const jogo = state.jogos.find(j => j.id == jogoId);
-  document.getElementById('palpite-time1-label').textContent = jogo.time1;
-  document.getElementById('palpite-time2-label').textContent = jogo.time2;
-  row.style.display = 'flex';
-});
+  const palpiteJogoEl = document.getElementById('palpite-jogo');
+  if (palpiteJogoEl) {
+    palpiteJogoEl.addEventListener('change', () => {
+      const jogoId = palpiteJogoEl.value;
+      const row = document.getElementById('palpite-placar-row');
+      if (!jogoId) { if(row) row.style.display = 'none'; return; }
+      const jogo = state.jogos.find(j => j.id == jogoId);
+      if (jogo) {
+        document.getElementById('palpite-time1-label').textContent = jogo.time1;
+        document.getElementById('palpite-time2-label').textContent = jogo.time2;
+        if(row) row.style.display = 'flex';
+      }
+    });
+  }
 
-document.getElementById('res-jogo').addEventListener('change', () => {
-  const jogoId = document.getElementById('res-jogo').value;
-  if (!jogoId) return;
-  const jogo = state.jogos.find(j => j.id == jogoId);
-  document.getElementById('res-time1-label').textContent = jogo.time1;
-  document.getElementById('res-time2-label').textContent = jogo.time2;
-  const res = state.resultados[jogoId];
-  if (res) {
-    document.getElementById('res-gol1').value = res.gol1;
-    document.getElementById('res-gol2').value = res.gol2;
-  } else {
-    document.getElementById('res-gol1').value = 0;
-    document.getElementById('res-gol2').value = 0;
+  const resJogoEl = document.getElementById('res-jogo');
+  if (resJogoEl) {
+    resJogoEl.addEventListener('change', () => {
+      const jogoId = resJogoEl.value;
+      if (!jogoId) return;
+      const jogo = state.jogos.find(j => j.id == jogoId);
+      if (jogo) {
+        document.getElementById('res-time1-label').textContent = jogo.time1;
+        document.getElementById('res-time2-label').textContent = jogo.time2;
+        const res = state.resultados[jogoId];
+        document.getElementById('res-gol1').value = res ? res.gol1 : 0;
+        document.getElementById('res-gol2').value = res ? res.gol2 : 0;
+      }
+    });
+  }
+  
+  const cfgValorEl = document.getElementById('cfg-valor');
+  if (cfgValorEl) {
+    cfgValorEl.addEventListener('input', atualizarPreviewCfg);
   }
 });
 
@@ -903,7 +916,6 @@ function getRanking() {
   const pote = (state.valorEntrada || 0) * state.participantes.length;
 
   if (pote > 0 && ranked.length > 0 && ranked[0].pts > 0) {
-    // Todos que empataram no topo dividem o pote inteiro
     const maxPts = ranked[0].pts;
     const maxExatos = ranked[0].exatos;
     const vencedores = ranked.filter(r => r.pts === maxPts && r.exatos === maxExatos);
@@ -929,6 +941,7 @@ function renderAll() {
 
 function renderParticipantes() {
   const el = document.getElementById('participantes-lista');
+  if(!el) return;
   if (!state.participantes.length) {
     el.innerHTML = '<p style="font-size:.82rem;color:var(--texto2);padding:8px 0">Nenhum participante ainda.</p>';
     return;
@@ -944,6 +957,7 @@ function renderParticipantes() {
 
 function renderJogos() {
   const el = document.getElementById('jogos-content');
+  if(!el) return;
   if (!state.jogos.length) {
     el.innerHTML = `<div class="empty"><div class="empty-icon">📋</div><div class="empty-titulo">Sem jogos ainda</div><div class="empty-sub">Adicione jogos no formulário acima.</div></div>`;
     return;
@@ -975,35 +989,40 @@ function renderJogos() {
 }
 
 function renderSelects() {
-  // participante
   const sp = document.getElementById('palpite-participante');
-  const va = sp.value;
-  sp.innerHTML = '<option value="">Selecione...</option>' + state.participantes.map(p => `<option value="${p.id}">${p.nome}</option>`).join('');
-  sp.value = va;
+  if(sp) {
+    const va = sp.value;
+    sp.innerHTML = '<option value="">Selecione...</option>' + state.participantes.map(p => `<option value="${p.id}">${p.nome}</option>`).join('');
+    sp.value = va;
+  }
 
-  // filtro palpites
   const fp = document.getElementById('filtro-part-palpites');
-  const vfp = fp.value;
-  fp.innerHTML = '<option value="">Todos os participantes</option>' + state.participantes.map(p => `<option value="${p.id}">${p.nome}</option>`).join('');
-  fp.value = vfp;
+  if(fp) {
+    const vfp = fp.value;
+    fp.innerHTML = '<option value="">Todos os participantes</option>' + state.participantes.map(p => `<option value="${p.id}">${p.nome}</option>`).join('');
+    fp.value = vfp;
+  }
 
-  // jogo palpite
   const sj = document.getElementById('palpite-jogo');
-  const vj = sj.value;
-  sj.innerHTML = '<option value="">Selecione...</option>' + state.jogos.map(j => `<option value="${j.id}">${j.time1} × ${j.time2}</option>`).join('');
-  sj.value = vj;
+  if(sj) {
+    const vj = sj.value;
+    sj.innerHTML = '<option value="">Selecione...</option>' + state.jogos.map(j => `<option value="${j.id}">${j.time1} × ${j.time2}</option>`).join('');
+    sj.value = vj;
+  }
 
-  // resultado jogo
   const rj = document.getElementById('res-jogo');
-  const vrj = rj.value;
-  rj.innerHTML = '<option value="">Selecione...</option>' + state.jogos.map(j => `<option value="${j.id}">${j.time1} × ${j.time2}</option>`).join('');
-  rj.value = vrj;
+  if(rj) {
+    const vrj = rj.value;
+    rj.innerHTML = '<option value="">Selecione...</option>' + state.jogos.map(j => `<option value="${j.id}">${j.time1} × ${j.time2}</option>`).join('');
+    rj.value = vrj;
+  }
 
-  // filtro jogo palpites
   const fj = document.getElementById('filtro-jogo-palpites');
-  const vfj = fj.value;
-  fj.innerHTML = '<option value="">Todos os jogos</option>' + state.jogos.map(j => `<option value="${j.id}">${j.time1} × ${j.time2}</option>`).join('');
-  fj.value = vfj;
+  if(fj) {
+    const vfj = fj.value;
+    fj.innerHTML = '<option value="">Todos os jogos</option>' + state.jogos.map(j => `<option value="${j.id}">${j.time1} × ${j.time2}</option>`).join('');
+    fj.value = vfj;
+  }
 }
 
 function renderRanking() {
@@ -1013,25 +1032,27 @@ function renderRanking() {
   const pote = getPote();
   const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-  // Cards de resumo
-  document.getElementById('trophy-row-container').innerHTML = `
-    <div class="trophy-card">
-      <div class="trophy-num">${state.participantes.length}</div>
-      <div class="trophy-label">Participantes</div>
-    </div>
-    <div class="trophy-card">
-      <div class="trophy-num">${finalizados}/${totalJogos}</div>
-      <div class="trophy-label">Jogos finalizados</div>
-    </div>
-    <div class="trophy-card" style="border-color:rgba(245,197,24,.4); background:linear-gradient(135deg,#1c2b22,#2a3a20)">
-      <div class="trophy-num" style="color:var(--ouro);font-size:${pote>=1000?'1.5rem':'2.2rem'}">${fmt(pote)}</div>
-      <div class="trophy-label">💰 Pote Total</div>
-    </div>
-  `;
+  const trophyRow = document.getElementById('trophy-row-container');
+  if(trophyRow) {
+    trophyRow.innerHTML = `
+      <div class="trophy-card">
+        <div class="trophy-num">${state.participantes.length}</div>
+        <div class="trophy-label">Participantes</div>
+      </div>
+      <div class="trophy-card">
+        <div class="trophy-num">${finalizados}/${totalJogos}</div>
+        <div class="trophy-label">Jogos finalizados</div>
+      </div>
+      <div class="trophy-card" style="border-color:rgba(245,197,24,.4); background:linear-gradient(135deg,#1c2b22,#2a3a20)">
+        <div class="trophy-num" style="color:var(--ouro);font-size:${pote>=1000?'1.5rem':'2.2rem'}">${fmt(pote)}</div>
+        <div class="trophy-label">💰 Pote Total</div>
+      </div>
+    `;
+  }
 
-  // Card vencedor
   const premioEl = document.getElementById('premio-card-container');
   const partEl   = document.getElementById('participantes-card-container');
+  if(!premioEl || !partEl) return;
 
   if (!ranking.length) {
     premioEl.innerHTML = `<div class="empty"><div class="empty-icon">⚽</div><div class="empty-titulo">Sem participantes</div><div class="empty-sub">Adicione participantes na aba Config.</div></div>`;
@@ -1069,7 +1090,6 @@ function renderRanking() {
     `;
   }
 
-  // Lista de todos os participantes com pontos
   partEl.innerHTML = `
     <div class="card">
       <div class="card-title">👥 Participantes</div>
@@ -1090,6 +1110,7 @@ function renderRanking() {
 
 function renderPalpites() {
   const el = document.getElementById('palpites-content');
+  if(!el) return;
   const filtroJogo = document.getElementById('filtro-jogo-palpites').value;
   const filtroP    = document.getElementById('filtro-part-palpites').value;
 
@@ -1145,7 +1166,8 @@ function salvarConfigBolao() {
 }
 
 function atualizarPreviewCfg() {
-  const v = parseFloat(document.getElementById('cfg-valor').value) || 0;
+  const cfgValEl = document.getElementById('cfg-valor');
+  const v = cfgValEl ? parseFloat(cfgValEl.value) || 0 : 0;
   const n = state.participantes.length;
   const pote = v * n;
   const fmt = x => x.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -1156,8 +1178,6 @@ function atualizarPreviewCfg() {
     ? `<span style="color:var(--ouro);font-weight:600">Pote atual: ${fmt(pote)}</span> com ${n} participante${n>1?'s':''}`
     : `<span style="color:var(--texto2)">Adicione participantes para ver o pote</span>`;
 }
-
-document.getElementById('cfg-valor')?.addEventListener('input', atualizarPreviewCfg);
 
 // ─── MODAL CONFIRM ───
 function modalConfirm(msg, onOk) {
@@ -1195,6 +1215,7 @@ function lerImport(e) {
 // ─── TOAST ───
 function toast(msg) {
   const t = document.getElementById('toast');
+  if(!t) return;
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2600);
