@@ -717,9 +717,9 @@
 
 <input type="file" id="import-file" accept=".json" style="display:none" onchange="lerImport(event)" />
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
 
 const firebaseConfig = {
   apiKey: "AIzaSyBKR-FJAeUIyYhYQiqy0VrZaFY7Yq1NCME",
@@ -731,9 +731,9 @@ const firebaseConfig = {
   appId: "1:243356737111:web:9fc299a86da530aee04d12"
 };
 
-const app = initializeApp(firebaseConfig);
-const db  = getDatabase(app);
-const dbRef = ref(db, 'bolao');
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const dbRef = db.ref('bolao');
 
 // ─── ESTADO ───
 let state = {
@@ -746,11 +746,11 @@ let state = {
 };
 
 function salvar() {
-  set(dbRef, state);
+  dbRef.set(state);
 }
 
 // Escuta mudanças em tempo real
-onValue(dbRef, (snapshot) => {
+dbRef.on('value', (snapshot) => {
   const data = snapshot.val();
   if (data) {
     state = {
@@ -1190,23 +1190,6 @@ function toast(msg) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2600);
 }
-
-// ─── EXPOR FUNÇÕES GLOBAIS (necessário com type=module) ───
-window.showPage            = showPage;
-window.adicionarParticipante = adicionarParticipante;
-window.removerParticipante = removerParticipante;
-window.adicionarJogo       = adicionarJogo;
-window.removerJogo         = removerJogo;
-window.salvarPalpite       = salvarPalpite;
-window.salvarResultado     = salvarResultado;
-window.removerResultado    = removerResultado;
-window.salvarConfigBolao   = salvarConfigBolao;
-window.renderPalpites      = renderPalpites;
-window.exportarDados       = exportarDados;
-window.importarDados       = importarDados;
-window.lerImport           = lerImport;
-window.fecharModal         = fecharModal;
-window.modalConfirm        = modalConfirm;
 </script>
 </body>
 </html>
