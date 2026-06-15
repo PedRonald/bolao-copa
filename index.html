@@ -294,7 +294,7 @@
   .palpite-select { flex: 0 0 auto; }
   .palpites-header {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr 80px;
+    grid-template-columns: 1.2fr 1fr 1fr 80px;
     gap: 8px;
     padding: 8px 16px;
     font-size: 0.72rem;
@@ -307,7 +307,7 @@
   }
   .palpite-row {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr 80px;
+    grid-template-columns: 1.2fr 1fr 1fr 80px;
     gap: 8px;
     padding: 10px 16px;
     border-radius: 8px;
@@ -335,6 +335,8 @@
     padding: 4px 12px;
     border-radius: 8px;
     text-align: center;
+    display: inline-block;
+    min-width: 40px;
   }
   .pontos-3 { background: rgba(46,204,113,.15); color: #2ecc71; }
   .pontos-1 { background: rgba(245,197,24,.12); color: var(--ouro); }
@@ -466,8 +468,18 @@
     .card { padding: 16px 12px; }
     .trophy-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
     .trophy-card { min-width: 0; }
-    .palpites-header, .palpite-row { grid-template-columns: 1fr 1fr 60px; }
-    .palpites-header > :nth-child(2), .palpite-row > :nth-child(2) { display: none; }
+    
+    /* Correção responsiva adaptável baseada em bloco para Palpites */
+    .palpites-header { display: none; }
+    .palpite-row { 
+      grid-template-columns: 1fr; 
+      gap: 6px; 
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding: 14px 8px;
+    }
+    .palpite-row > div { text-align: left !important; }
+    .palpite-placar { margin: 2px 0; }
+
     .ranking-table th:nth-child(3),
     .ranking-table th:nth-child(4),
     .ranking-table td:nth-child(3),
@@ -479,6 +491,7 @@
     .form-group { min-width: 0; }
     .grid2 { grid-template-columns: 1fr; }
     #palpite-placar-row { flex-wrap: wrap; gap: 10px; }
+    .col-premio { display: none; }
   }
 
   .highlight-leader {
@@ -495,10 +508,6 @@
     padding: 4px 10px;
     border-radius: 8px;
     white-space: nowrap;
-  }
-
-  @media (max-width: 640px) {
-    .col-premio { display: none; }
   }
 </style>
 </head>
@@ -521,14 +530,12 @@
 
 <main>
 
-  <!-- ────────── RESULTADO ────────── -->
   <div id="page-ranking" class="page active">
     <div id="trophy-row-container" class="trophy-row"></div>
     <div id="premio-card-container"></div>
     <div id="participantes-card-container"></div>
   </div>
 
-  <!-- ────────── JOGOS ────────── -->
   <div id="page-jogos" class="page">
     <div class="card">
       <div class="card-title">➕ Adicionar Jogo</div>
@@ -559,7 +566,6 @@
     </div>
   </div>
 
-  <!-- ────────── PALPITES ────────── -->
   <div id="page-palpites" class="page">
     <div class="card">
       <div class="card-title">🎯 Cadastrar Palpites</div>
@@ -609,7 +615,6 @@
     </div>
   </div>
 
-  <!-- ────────── CONFIG ────────── -->
   <div id="page-config" class="page">
 
     <div class="card" style="border-color:rgba(245,197,24,.25); margin-bottom:20px">
@@ -756,10 +761,10 @@ dbRef.on('value', (snapshot) => {
     state = {
       participantes: data.participantes || [],
       jogos:         data.jogos         || [],
-      palpites:      data.palpites       || [],
-      resultados:    data.resultados     || {},
-      valorEntrada:  data.valorEntrada   || 0,
-      distribuicao:  data.distribuicao   || [60, 30, 10]
+      palpites:      data.palpites      || [],
+      resultados:    data.resultados    || {},
+      valorEntrada:  data.valorEntrada  || 0,
+      distribuicao:  data.distribuicao  || [60, 30, 10]
     };
   }
   renderAll();
@@ -978,7 +983,9 @@ function renderSelects() {
 
   // filtro palpites
   const fp = document.getElementById('filtro-part-palpites');
+  const vfp = fp.value;
   fp.innerHTML = '<option value="">Todos os participantes</option>' + state.participantes.map(p => `<option value="${p.id}">${p.nome}</option>`).join('');
+  fp.value = vfp;
 
   // jogo palpite
   const sj = document.getElementById('palpite-jogo');
@@ -994,7 +1001,9 @@ function renderSelects() {
 
   // filtro jogo palpites
   const fj = document.getElementById('filtro-jogo-palpites');
+  const vfj = fj.value;
   fj.innerHTML = '<option value="">Todos os jogos</option>' + state.jogos.map(j => `<option value="${j.id}">${j.time1} × ${j.time2}</option>`).join('');
+  fj.value = vfj;
 }
 
 function renderRanking() {
@@ -1060,7 +1069,7 @@ function renderRanking() {
     `;
   }
 
-  // Lista de todos os participantes com pontos (sem destaque, só informativo)
+  // Lista de todos os participantes com pontos
   partEl.innerHTML = `
     <div class="card">
       <div class="card-title">👥 Participantes</div>
@@ -1112,7 +1121,7 @@ function renderPalpites() {
         <div class="palpite-row">
           <div style="display:flex;align-items:center;gap:8px">
             <div class="chip-avatar" style="width:26px;height:26px;font-size:.72rem;flex-shrink:0">${part.nome[0].toUpperCase()}</div>
-            <span style="font-size:.88rem">${part.nome}</span>
+            <span style="font-size:.88rem; font-weight:600;">${part.nome}</span>
           </div>
           <div style="font-size:.82rem;color:var(--texto2)">${jogo.time1} × ${jogo.time2}</div>
           <div class="palpite-placar">
