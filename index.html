@@ -350,8 +350,8 @@
             </div>
           </div>
           <div class="form-group">
-            <label>Valor da Cota da Aposta para este jogo (R$)</label>
-            <input type="number" id="palpite-dinheiro" min="0" step="1" value="10" style="width:100%" />
+            <label>Valor que deseja apostar NESTE jogo (R$)</label>
+            <input type="number" id="palpite-dinheiro" min="1" step="0.50" value="10" style="width:100%" />
           </div>
           <button class="btn btn-primary" onclick="salvarPalpite()">💾 Registrar Aposta</button>
         </div>
@@ -420,7 +420,7 @@
 
     <div class="card" style="border-color:rgba(231,76,60,.2); margin-top:20px">
       <div class="card-title" style="color:var(--erro)">⚠️ Limpeza do Sistema</div>
-      <button class="btn btn-danger" onclick="modalConfirm('Deseja limpar todo o banco de dados do Realtime?', () => { localStorage.clear(); location.reload(); })">🗑️ Deletar Banco de Dados</button>
+      <button class="btn btn-danger" onclick="modalConfirm('Deseja limpar todo o banco de dados do Realtime?', () => { dbRef.set({participantes:[], jogos:[], palpites:[], resultados:{}}); location.reload(); })">🗑️ Deletar Banco de Dados</button>
     </div>
   </div>
 </main>
@@ -509,7 +509,7 @@ function showPage(id, el) {
   renderAll();
 }
 
-// ─── LÓGICA DE CONTABILIDADE POR JOGO (DINHEIRO DIRETO) ───
+// ─── ALGORITMO MONETÁRIO DE RATEIO ───
 function calcularMatrizFinanceira() {
   let balanco = {};
   state.participantes.forEach(p => { balanco[p.id] = { investido: 0, ganho: 0, saldo: 0 }; });
@@ -526,9 +526,8 @@ function calcularMatrizFinanceira() {
       }
     });
 
-    if (!res) return; // Jogo ainda em aberto, não distribui receita
+    if (!res) return; 
 
-    // Filtra níveis de acertos
     let acertaramPlacarExato = [];
     let acertaramVencedor = [];
 
@@ -542,7 +541,6 @@ function calcularMatrizFinanceira() {
       else if(acertouVencedor) acertaramVencedor.push(p);
     });
 
-    // Distribuição do montante arrecadado (Pote)
     if (acertaramPlacarExato.length > 0) {
       let somaApostasGanhadoras = acertaramPlacarExato.reduce((a, b) => a + b.dinheiro, 0);
       acertaramPlacarExato.forEach(p => {
@@ -556,7 +554,6 @@ function calcularMatrizFinanceira() {
         if(balanco[p.participanteId]) balanco[p.participanteId].ganho += (poteDoJogo * proporcao);
       });
     } else {
-      // Ninguém acertou nada: o dinheiro investido volta para cada um
       palpitesDoJogo.forEach(p => {
         if(balanco[p.participanteId]) balanco[p.participanteId].ganho += p.dinheiro;
       });
@@ -587,7 +584,7 @@ function removerParticipante(id) {
 function adicionarJogo() {
   const t1 = document.getElementById('jogo-time1').value.trim();
   const t2 = document.getElementById('jogo-time2').value.trim();
-  const g  = document.getElementById('jogo-grupo').value.trim();
+  const g  = document.getElementById('jogo-grupo').value.trim() || 'Geral';
   const d  = document.getElementById('jogo-data').value;
   if (!t1 || !t2) return;
   state.jogos.push({ id: Date.now(), time1: t1, time2: t2, grupo: g, data: d });
@@ -602,20 +599,23 @@ function removerJogo(id) {
   salvar(); renderAll();
 }
 
+// CORREÇÃO AQUI: Gravando e associando o jogoId perfeitamente ao estado global do Firebase
 function salvarPalpite() {
   const partId = parseInt(document.getElementById('palpite-participante').value);
   const jogoId = parseInt(document.getElementById('palpite-jogo').value);
   const g1 = parseInt(document.getElementById('palpite-gol1').value) || 0;
   const g2 = parseInt(document.getElementById('palpite-gol2').value) || 0;
   const grana = parseFloat(document.getElementById('palpite-dinheiro').value) || 0;
-  if (!partId || !jogoId || grana <= 0) { toast('❌ Preencha todos os campos e valor válido'); return; }
+
+  if (!partId || !jogoId || grana <= 0) { toast('❌ Escolha o participante, jogo e o valor.'); return; }
 
   const idx = state.palpites.findIndex(p => p.participanteId === partId && p.jogoId === jogoId);
-  const obj = { participanteId: partId, juegoId: jogoId, jogoId, gol1: g1, gol2: g2, dinheiro: grana };
+  const objAposta = { participanteId: partId, jogoId: jogoId, gol1: g1, gol2: g2, dinheiro: grana };
   
-  if (idx >= 0) state.palpites[idx] = obj;
-  else state.palpites.push(obj);
-  salvar(); renderAll(); toast('💾 Aposta registrada com sucesso!');
+  if (idx >= 0) state.palpites[idx] = objAposta;
+  else state.palpites.push(objAposta);
+
+  salvar(); renderAll(); toast('💾 Aposta em dinheiro salva!');
 }
 
 function salvarResultado() {
@@ -668,7 +668,7 @@ function renderJogos() {
     <div class="jogo-card">
       <div class="jogo-header">
         <span class="jogo-grupo">${j.grupo}</span>
-        <span style="color:var(--ouro); font-weight:700">Pote: R$ ${totalPoteJogo.toFixed(2)}</span>
+        <span style="color:var(--ouro); font-weight:700">Pote total: R$ ${totalPoteJogo.toFixed(2)}</span>
         <button class="btn btn-danger btn-sm" onclick="removerJogo(${j.id})">🗑️</button>
       </div>
       <div class="placar-row">
@@ -680,7 +680,7 @@ function renderJogos() {
         </div>
         <div class="time-nome right">${j.time2}</div>
       </div>
-      <span class="status-badge ${res ? 'status-finalizado' : 'status-aberto'}">${res ? '✅ Fechado' : '⏳ Aberto a Apostas'}</span>
+      <span class="status-badge ${res ? 'status-finalizado' : 'status-aberto'}">${res ? '✅ Fechado e Pago' : '⏳ Aberto a Apostas'}</span>
     </div>`;
   }).join('');
 }
@@ -700,7 +700,6 @@ function renderExtratoGeral() {
   const matriz = calcularMatrizFinanceira();
   const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   
-  // Calcula dados globais do bolão
   let totalMovimentado = 0;
   state.palpites.forEach(p => totalMovimentado += p.dinheiro);
 
@@ -709,11 +708,11 @@ function renderExtratoGeral() {
     trophyRow.innerHTML = `
       <div class="trophy-card">
         <div class="trophy-num">${state.participantes.length}</div>
-        <div class="trophy-label">Investidores</div>
+        <div class="trophy-label">Apostadores</div>
       </div>
       <div class="trophy-card" style="border-color:rgba(46,204,113,.4); background:linear-gradient(135deg,#1c2b22,#153a20)">
         <div class="trophy-num" style="color:#2ecc71">${fmt(totalMovimentado)}</div>
-        <div class="trophy-label">Total Circulado em Caixa</div>
+        <div class="trophy-label">Total em Caixa (Geral)</div>
       </div>
     `;
   }
@@ -721,10 +720,9 @@ function renderExtratoGeral() {
   const tbody = document.getElementById('ranking-geral-tbody');
   if(!tbody) return;
 
-  // Organiza ranking por quem está mais lucrando líquido
   const listaRankeada = state.participantes.map(p => ({ ...p, ...matriz[p.id] })).sort((a,b) => b.saldo - a.saldo);
 
-  if(!listaRankeada.length) { tbody.innerHTML = `<tr><td colspan="5" class="empty">Sem movimentações.</td></tr>`; return; }
+  if(!listaRankeada.length) { tbody.innerHTML = `<tr><td colspan="5" class="empty">Sem movimentações em caixa.</td></tr>`; return; }
 
   tbody.innerHTML = listaRankeada.map((r, i) => {
     const classeSaldo = r.saldo > 0 ? 'val-positivo' : r.saldo < 0 ? 'val-negativo' : '';
@@ -763,19 +761,18 @@ function renderJogoAtualLive() {
       <div style="font-family:'Barlow Condensed', sans-serif; font-weight:800; font-size:1.6rem; margin-bottom:8px">
         ${j.time1} × ${j.time2}
       </div>
-      <div style="font-size:1.1rem; color:#2ecc71; font-weight:700">Pote Deste Jogo: ${fmt(totalPote)}</div>
+      <div style="font-size:1.1rem; color:#2ecc71; font-weight:700">Pote Acumulado: ${fmt(totalPote)}</div>
       <span class="status-badge ${res ? 'status-finalizado' : 'status-aberto'}" style="margin-top:10px">
-        ${res ? `Placar Real do Jogo: ${res.gol1} × ${res.gol2}` : '⏳ Em Aberto (Aguardando Placar Real)'}
+        ${res ? `Resultado Oficial: ${res.gol1} × ${res.gol2}` : '⏳ Em Aberto (Aguardando Placar Final)'}
       </span>
     </div>
   `;
 
   if(!palpitesDoJogo.length) {
-    containerContent.innerHTML = `<div class="empty">Nenhuma aposta casada neste jogo.</div>`;
+    containerContent.innerHTML = `<div class="empty">Nenhuma aposta casada neste jogo ainda.</div>`;
     return;
   }
 
-  // Descobrir dinâmica de quem ganhou o jogo para exibir no extrato do Jogo Atual
   let acertaramExato = [];
   let acertaramVencedor = [];
   if(res) {
@@ -788,9 +785,9 @@ function renderJogoAtualLive() {
   containerContent.innerHTML = `
     <div class="palpites-header">
       <div>Participante</div>
-      <div>Aposta / Placar</div>
-      <div>Dinheiro Casado</div>
-      <div style="text-align:right">Retorno Liquido</div>
+      <div>Placar Apostado</div>
+      <div>Valor Casado</div>
+      <div style="text-align:right">Balanço Líquido</div>
     </div>
     ${palpitesDoJogo.map(p => {
       const part = state.participantes.find(x => x.id === p.participanteId);
@@ -798,10 +795,9 @@ function renderJogoAtualLive() {
       
       let retornoBruto = 0;
       let badgeClass = "fin-neutro";
-      let labelStatus = "Pote Aberto";
+      let labelStatus = "Aberto";
 
       if(res) {
-        // Regra de rateio igual calculada na matriz
         if(acertaramExato.length > 0) {
           if(p.gol1 === res.gol1 && p.gol2 === res.gol2) {
             retornoBruto = totalPote * (p.dinheiro / acertaramExato.reduce((a,b)=>a+b.dinheiro,0));
@@ -811,24 +807,20 @@ function renderJogoAtualLive() {
             retornoBruto = totalPote * (p.dinheiro / acertaramVencedor.reduce((a,b)=>a+b.dinheiro,0));
           }
         } else {
-          retornoBruto = p.dinheiro; // reembolso geral
+          retornoBruto = p.dinheiro; 
         }
         
         let lucroLiquido = retornoBruto - p.dinheiro;
         if(lucroLiquido > 0) { badgeClass = "fin-lucro"; labelStatus = `+${fmt(lucroLiquido)}`; }
         else if(lucroLiquido < 0) { badgeClass = "fin-perda"; labelStatus = `${fmt(lucroLiquido)}`; }
-        else { badgeClass = "fin-neutro"; labelStatus = "Reembolsado (0,00)"; }
+        else { badgeClass = "fin-neutro"; labelStatus = "Reembolso"; }
       }
 
       return `
         <div class="palpite-row">
-          <div style="display:flex;align-items:center;gap:8px">
-            <span style="font-weight:600;">${part.nome}</span>
-          </div>
-          <div class="palpite-placar">
-            <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.1rem">${p.gol1} × ${p.gol2}</span>
-          </div>
-          <div style="font-family:'Barlow Condensed',sans-serif; font-weight:600; color:var(--texto2)">${fmt(p.dinheiro)}</div>
+          <div><span style="font-weight:600;">${part.nome}</span></div>
+          <div class="palpite-placar"><span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.1rem">${p.gol1} × ${p.gol2}</span></div>
+          <div style="font-family:'Barlow Condensed', sans-serif; font-weight:600; color:var(--texto2)">${fmt(p.dinheiro)}</div>
           <div style="text-align:right"><span class="badge-financeira ${badgeClass}">${labelStatus}</span></div>
         </div>
       `;
