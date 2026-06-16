@@ -30,7 +30,6 @@
     min-height: 100vh;
   }
 
-  /* ── HEADER ── */
   header {
     background: linear-gradient(135deg, var(--verde) 0%, #0d2b1d 100%);
     border-bottom: 3px solid var(--ouro);
@@ -89,7 +88,6 @@
     .nav-tab { flex: 0 0 auto; padding: 8px 16px; font-size: 0.85rem; letter-spacing: 1px; }
   }
 
-  /* ── LAYOUT ── */
   main {
     max-width: 1100px;
     margin: 0 auto;
@@ -98,7 +96,6 @@
   .page { display: none; }
   .page.active { display: block; }
 
-  /* ── CARDS ── */
   .card {
     background: var(--card);
     border: 1px solid rgba(245,197,24,.12);
@@ -119,7 +116,6 @@
     gap: 8px;
   }
 
-  /* ── FORM ── */
   .form-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
   .form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 160px; }
   label {
@@ -143,7 +139,6 @@
   input:focus, select:focus { border-color: var(--ouro); }
   select option { background: #1c2b22; }
 
-  /* ── BUTTONS ── */
   .btn {
     font-family: 'Barlow Condensed', sans-serif;
     font-weight: 700;
@@ -167,7 +162,6 @@
   .btn-danger:hover { background: rgba(231,76,60,.25); }
   .btn-sm { padding: 6px 12px; font-size: 0.78rem; }
 
-  /* ── PARTICIPANTES ── */
   .participantes-lista {
     display: flex;
     flex-wrap: wrap;
@@ -209,11 +203,7 @@
   }
   .chip-remove:hover { color: var(--erro); }
 
-  /* ── JOGOS ── */
-  .jogos-grid {
-    display: grid;
-    gap: 14px;
-  }
+  .jogos-grid { display: grid; gap: 14px; }
   .jogo-card {
     background: var(--card2);
     border: 1px solid rgba(255,255,255,.07);
@@ -238,15 +228,8 @@
     padding: 3px 10px;
     border-radius: 12px;
   }
-  .jogo-data {
-    font-size: 0.78rem;
-    color: var(--texto2);
-  }
-  .placar-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
+  .jogo-data { font-size: 0.78rem; color: var(--texto2); }
+  .placar-row { display: flex; align-items: center; gap: 12px; }
   .time-nome {
     font-family: 'Barlow Condensed', sans-serif;
     font-weight: 700;
@@ -256,11 +239,7 @@
     flex: 1;
   }
   .time-nome.right { text-align: right; }
-  .placar-inputs {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+  .placar-inputs { display: flex; align-items: center; gap: 8px; }
   .placar-input {
     width: 52px;
     text-align: center;
@@ -290,8 +269,7 @@
   .status-finalizado { background: rgba(46,204,113,.1); color: #2ecc71; }
   .status-aberto { background: rgba(245,197,24,.12); color: var(--ouro); }
 
-  /* ── PALPITES ── */
-  .palpite-select { flex: 0 0 auto; }
+  /* ── TABELAS DE PONTOS / LIVE JOGO ── */
   .palpites-header {
     display: grid;
     grid-template-columns: 1.2fr 1fr 1fr 80px;
@@ -315,19 +293,7 @@
     transition: background .15s;
   }
   .palpite-row:hover { background: rgba(255,255,255,.03); }
-  .palpite-placar {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .palpite-num {
-    width: 36px;
-    text-align: center;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    font-size: 1.1rem;
-    padding: 4px;
-  }
+  .palpite-placar { display: flex; align-items: center; gap: 6px; }
   .pontos-badge {
     font-family: 'Barlow Condensed', sans-serif;
     font-weight: 800;
@@ -343,61 +309,28 @@
   .pontos-0 { background: rgba(255,255,255,.05); color: var(--texto2); }
   .pontos-? { background: rgba(255,255,255,.05); color: var(--texto2); }
 
-  /* ── RANKING ── */
-  .ranking-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
+  /* ── RANKING GERAL TABLE ── */
+  .ranking-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
   .ranking-table th {
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 1px;
     text-transform: uppercase;
     color: var(--texto2);
-    padding: 10px 16px;
+    padding: 12px 16px;
     text-align: left;
     border-bottom: 1px solid rgba(255,255,255,.08);
   }
-  .ranking-table td {
-    padding: 14px 16px;
-    border-bottom: 1px solid rgba(255,255,255,.04);
-  }
+  .ranking-table td { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,.04); }
   .ranking-table tr:last-child td { border-bottom: none; }
-  .rank-pos {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 900;
-    font-size: 1.4rem;
-    color: var(--texto2);
-    width: 40px;
-  }
-  .rank-pos.top1 { color: #FFD700; }
-  .rank-pos.top2 { color: #C0C0C0; }
-  .rank-pos.top3 { color: #CD7F32; }
-  .rank-nome {
-    font-weight: 600;
-    font-size: 0.95rem;
-  }
-  .rank-pts {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 800;
-    font-size: 1.5rem;
-    color: var(--ouro);
-    text-align: right;
-  }
-  .rank-detalhe {
-    font-size: 0.78rem;
-    color: var(--texto2);
-    text-align: right;
-  }
-  .rank-medal { font-size: 1.4rem; }
+  
+  .rank-pos { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.2rem; width: 50px; }
+  .rank-nome { font-weight: 600; font-size: 0.95rem; }
+  .rank-stats { font-size: 0.82rem; color: var(--texto2); }
+  .rank-money { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; color: #2ecc71; font-size: 1.1rem; text-align: right; }
+  .rank-pts { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1.4rem; color: var(--ouro); text-align: right; }
 
-  /* ── TROPHY ROW ── */
-  .trophy-row {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 28px;
-    flex-wrap: wrap;
-  }
+  .trophy-row { display: flex; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
   .trophy-card {
     flex: 1;
     min-width: 160px;
@@ -407,41 +340,14 @@
     padding: 18px;
     text-align: center;
   }
-  .trophy-num {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 900;
-    font-size: 2.2rem;
-    color: var(--ouro);
-    line-height: 1;
-  }
-  .trophy-label {
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--texto2);
-    margin-top: 4px;
-  }
+  .trophy-num { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 2.2rem; color: var(--ouro); line-height: 1; }
+  .trophy-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--texto2); margin-top: 4px; }
 
-  /* ── EMPTY STATE ── */
-  .empty {
-    text-align: center;
-    padding: 48px 24px;
-    color: var(--texto2);
-  }
+  .empty { text-align: center; padding: 48px 24px; color: var(--texto2); }
   .empty-icon { font-size: 3rem; margin-bottom: 12px; }
-  .empty-titulo {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    font-size: 1.1rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--texto);
-    margin-bottom: 6px;
-  }
+  .empty-titulo { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; color: var(--texto); margin-bottom: 6px; }
   .empty-sub { font-size: 0.85rem; }
 
-  /* ── TOAST ── */
   .toast {
     position: fixed;
     bottom: 24px;
@@ -459,10 +365,8 @@
   }
   .toast.show { transform: translateY(0); opacity: 1; }
 
-  /* ── GRID 2 colunas ── */
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 
-  /* ── RESPONSIVE ── */
   @media (max-width: 640px) {
     main { padding: 16px 10px; }
     .card { padding: 16px 12px; }
@@ -470,43 +374,19 @@
     .trophy-card { min-width: 0; }
     
     .palpites-header { display: none; }
-    .palpite-row { 
-      grid-template-columns: 1fr; 
-      gap: 6px; 
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      padding: 14px 8px;
-    }
+    .palpite-row { grid-template-columns: 1fr; gap: 6px; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 14px 8px; }
     .palpite-row > div { text-align: left !important; }
     .palpite-placar { margin: 2px 0; }
 
-    .ranking-table th:nth-child(3),
-    .ranking-table th:nth-child(4),
-    .ranking-table td:nth-child(3),
-    .ranking-table td:nth-child(4) { display: none; }
+    .ranking-table th:nth-child(3), .ranking-table td:nth-child(3) { display: none; }
     .ranking-table td, .ranking-table th { padding: 10px 8px; }
+    
     .time-nome { font-size: 0.9rem; }
     .placar-input { width: 40px !important; font-size: 1.2rem; }
     .form-row { flex-direction: column; gap: 10px; }
     .form-group { min-width: 0; }
     .grid2 { grid-template-columns: 1fr; }
     #palpite-placar-row { flex-wrap: wrap; gap: 10px; }
-    .col-premio { display: none; }
-  }
-
-  .highlight-leader {
-    background: rgba(245,197,24,.06) !important;
-    border-radius: 8px;
-  }
-
-  .premio-valor {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 800;
-    font-size: 1rem;
-    color: #2ecc71;
-    background: rgba(46,204,113,.1);
-    padding: 4px 10px;
-    border-radius: 8px;
-    white-space: nowrap;
   }
 </style>
 </head>
@@ -520,9 +400,9 @@
 <header>
   <div class="logo">⚽ Bolão <span>da Copa</span></div>
   <nav class="nav-tabs">
-    <button class="nav-tab active" onclick="showPage('ranking', this)">🏆 Resultado</button>
+    <button class="nav-tab active" onclick="showPage('ranking', this)">🏆 Geral</button>
+    <button class="nav-tab" onclick="showPage('jogo-atual', this)">📺 Jogo Atual</button>
     <button class="nav-tab" onclick="showPage('jogos', this)">📋 Jogos</button>
-    <button class="nav-tab" onclick="showPage('palpites', this)">🎯 Palpites</button>
     <button class="nav-tab" onclick="showPage('config', this)">⚙️ Config</button>
   </nav>
 </header>
@@ -531,96 +411,117 @@
 
   <div id="page-ranking" class="page active">
     <div id="trophy-row-container" class="trophy-row"></div>
-    <div id="premio-card-container"></div>
-    <div id="participantes-card-container"></div>
+    
+    <div class="card">
+      <div class="card-title">🏆 Classificação Geral do Campeonato</div>
+      <div style="overflow-x: auto;">
+        <table class="ranking-table">
+          <thead>
+            <tr>
+              <th>Pos</th>
+              <th>Participante</th>
+              <th>Estatísticas (Exatos · Vencedores)</th>
+              <th style="text-align:right">Ganho Estimado</th>
+              <th style="text-align:right">Total Pts</th>
+            </tr>
+          </thead>
+          <tbody id="ranking-geral-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="page-jogo-atual" class="page">
+    <div class="card">
+      <div class="card-title">📺 Filtrar por Jogo Ao Vivo</div>
+      <p style="font-size:0.85rem; color:var(--texto2); margin-bottom:14px">Selecione uma partida para analisar o que cada um apostou e quem pontuou.</p>
+      <div class="form-row">
+        <div class="form-group">
+          <select id="filtro-live-jogo" onchange="renderJogoAtualLive()" style="width:100%; min-width:240px;">
+            <option value="">Selecione um jogo...</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div id="live-jogo-header-container"></div>
+
+    <div class="card">
+      <div class="card-title">🎯 Palpites e Pontuações da Galera</div>
+      <div id="live-palpites-content"></div>
+    </div>
   </div>
 
   <div id="page-jogos" class="page">
-    <div class="card">
-      <div class="card-title">➕ Adicionar Jogo</div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Time Casa</label>
-          <input type="text" id="jogo-time1" placeholder="Ex: Brasil" />
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title">🎯 Cadastrar Palpites</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Participante</label>
+            <select id="palpite-participante"><option value="">Selecione...</option></select>
+          </div>
+          <div class="form-group">
+            <label>Jogo</label>
+            <select id="palpite-jogo"><option value="">Selecione...</option></select>
+          </div>
         </div>
-        <div class="form-group">
-          <label>Time Visitante</label>
-          <input type="text" id="jogo-time2" placeholder="Ex: Argentina" />
-        </div>
-        <div class="form-group">
-          <label>Grupo / Fase</label>
-          <input type="text" id="jogo-grupo" placeholder="Ex: Grupo A" />
-        </div>
-        <div class="form-group">
-          <label>Data</label>
-          <input type="date" id="jogo-data" />
+        <div class="form-row" id="palpite-placar-row" style="display:none">
+          <div class="form-group" style="flex:0 0 auto">
+            <label id="palpite-time1-label">Casa</label>
+            <input type="number" id="palpite-gol1" min="0" max="20" value="0" class="placar-input" style="width:70px" />
+          </div>
+          <div class="form-group" style="flex:0 0 auto; justify-content: flex-end; padding-top: 26px">
+            <span style="font-size:1.5rem; color:var(--texto2); font-family:'Barlow Condensed',sans-serif; font-weight:800">×</span>
+          </div>
+          <div class="form-group" style="flex:0 0 auto">
+            <label id="palpite-time2-label">Visitante</label>
+            <input type="number" id="palpite-gol2" min="0" max="20" value="0" class="placar-input" style="width:70px" />
+          </div>
+          <div style="display:flex;align-items:flex-end; padding-bottom:2px">
+            <button class="btn btn-primary" onclick="salvarPalpite()">💾 Salvar</button>
+          </div>
         </div>
       </div>
-      <button class="btn btn-primary" onclick="adicionarJogo()">➕ Adicionar Jogo</button>
+
+      <div class="card">
+        <div class="card-title">➕ Criar Novo Jogo</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Time Casa</label>
+            <input type="text" id="jogo-time1" placeholder="Ex: Brasil" />
+          </div>
+          <div class="form-group">
+            <label>Time Visitante</label>
+            <input type="text" id="jogo-time2" placeholder="Ex: Argentina" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Grupo / Fase</label>
+            <input type="text" id="jogo-grupo" placeholder="Ex: Grupo A" />
+          </div>
+          <div class="form-group">
+            <label>Data</label>
+            <input type="date" id="jogo-data" />
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="adicionarJogo()">➕ Criar Jogo</button>
+      </div>
     </div>
 
     <div class="card">
-      <div class="card-title">📋 Lista de Jogos</div>
+      <div class="card-title">📋 Gerenciar Lista de Jogos</div>
       <div id="jogos-content" class="jogos-grid"></div>
     </div>
   </div>
 
-  <div id="page-palpites" class="page">
-    <div class="card">
-      <div class="card-title">🎯 Cadastrar Palpites</div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Participante</label>
-          <select id="palpite-participante">
-            <option value="">Selecione...</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Jogo</label>
-          <select id="palpite-jogo">
-            <option value="">Selecione...</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-row" id="palpite-placar-row" style="display:none">
-        <div class="form-group" style="flex:0 0 auto">
-          <label id="palpite-time1-label">Casa</label>
-          <input type="number" id="palpite-gol1" min="0" max="20" value="0" class="placar-input" style="width:70px" />
-        </div>
-        <div class="form-group" style="flex:0 0 auto; justify-content: flex-end; padding-top: 26px">
-          <span style="font-size:1.5rem; color:var(--texto2); font-family:'Barlow Condensed',sans-serif; font-weight:800">×</span>
-        </div>
-        <div class="form-group" style="flex:0 0 auto">
-          <label id="palpite-time2-label">Visitante</label>
-          <input type="number" id="palpite-gol2" min="0" max="20" value="0" class="placar-input" style="width:70px" />
-        </div>
-        <div style="display:flex;align-items:flex-end; padding-bottom:2px">
-          <button class="btn btn-primary" onclick="salvarPalpite()">💾 Salvar</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">📊 Todos os Palpites</div>
-      <div id="palpites-filtro" style="margin-bottom:16px; display:flex; gap:10px; flex-wrap:wrap">
-        <select id="filtro-jogo-palpites" onchange="renderPalpites()" style="flex:1; min-width:180px">
-          <option value="">Todos os jogos</option>
-        </select>
-        <select id="filtro-part-palpites" onchange="renderPalpites()" style="flex:1; min-width:160px">
-          <option value="">Todos os participantes</option>
-        </select>
-      </div>
-      <div id="palpites-content"></div>
-    </div>
-  </div>
-
   <div id="page-config" class="page">
-
     <div class="card" style="border-color:rgba(245,197,24,.25); margin-bottom:20px">
       <div class="card-title">💰 Configuração do Bolão</div>
       <div class="form-row">
         <div class="form-group">
-          <label>Valor por participante (R$)</label>
+          <label>Valor de Entrada por Amigo (R$)</label>
           <input type="number" id="cfg-valor" min="0" step="0.50" placeholder="Ex: 20.00" />
         </div>
         <div style="display:flex;align-items:flex-end;padding-bottom:2px">
@@ -632,10 +533,10 @@
 
     <div class="grid2">
       <div class="card">
-        <div class="card-title">👥 Participantes</div>
+        <div class="card-title">👥 Gerenciar Participantes</div>
         <div class="form-row">
           <div class="form-group">
-            <label>Nome</label>
+            <label>Nome Completo / Apelido</label>
             <input type="text" id="part-nome" placeholder="Nome do participante" />
           </div>
           <div style="display:flex;align-items:flex-end;padding-bottom:2px">
@@ -646,14 +547,12 @@
       </div>
 
       <div class="card">
-        <div class="card-title">🏁 Registrar Resultado</div>
-        <p style="font-size:0.82rem; color:var(--texto2); margin-bottom:16px">Informe o placar real de um jogo para calcular os pontos automaticamente.</p>
+        <div class="card-title">🏁 Registrar Placar Final</div>
+        <p style="font-size:0.82rem; color:var(--texto2); margin-bottom:16px">Insira o resultado real do jogo encerrado.</p>
         <div class="form-row">
           <div class="form-group">
-            <label>Jogo</label>
-            <select id="res-jogo">
-              <option value="">Selecione...</option>
-            </select>
+            <label>Escolha o Jogo</label>
+            <select id="res-jogo"><option value="">Selecione...</option></select>
           </div>
         </div>
         <div class="form-row">
@@ -670,40 +569,21 @@
           </div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn btn-primary" onclick="salvarResultado()">✅ Salvar Resultado</button>
-          <button class="btn btn-ghost btn-sm" onclick="removerResultado()">↩️ Remover Resultado</button>
+          <button class="btn btn-primary" onclick="salvarResultado()">✅ Confirmar Resultado</button>
+          <button class="btn btn-ghost btn-sm" onclick="removerResultado()">↩️ Resetar</button>
         </div>
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-title">📌 Regras de Pontuação</div>
-      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:16px">
-        <div style="background:var(--card2); border-radius:10px; padding:16px; border-left:3px solid #2ecc71">
-          <div style="font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:1.8rem; color:#2ecc71">3</div>
-          <div style="font-size:0.82rem; color:var(--texto2); margin-top:2px">Pontos — placar exato</div>
-        </div>
-        <div style="background:var(--card2); border-radius:10px; padding:16px; border-left:3px solid var(--ouro)">
-          <div style="font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:1.8rem; color:var(--ouro)">1</div>
-          <div style="font-size:0.82rem; color:var(--texto2); margin-top:2px">Ponto — acertou o vencedor</div>
-        </div>
-        <div style="background:var(--card2); border-radius:10px; padding:16px; border-left:3px solid rgba(255,255,255,.2)">
-          <div style="font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:1.8rem; color:var(--texto2)">0</div>
-          <div style="font-size:0.82rem; color:var(--texto2); margin-top:2px">Pontos — errou o resultado</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" style="border-color:rgba(231,76,60,.2)">
+    <div class="card" style="border-color:rgba(231,76,60,.2); margin-top: 20px;">
       <div class="card-title" style="color:var(--erro)">⚠️ Zona de Perigo</div>
       <div style="display:flex; gap:12px; flex-wrap:wrap">
         <button class="btn btn-danger" onclick="exportarDados()">📤 Exportar JSON</button>
         <button class="btn btn-ghost btn-sm" onclick="importarDados()">📥 Importar JSON</button>
-        <button class="btn btn-danger" onclick="modalConfirm('Apagar todos os dados do bolão?', () => { localStorage.clear(); location.reload(); })">🗑️ Limpar Tudo</button>
+        <button class="btn btn-danger" onclick="modalConfirm('Apagar todos os dados do bolão?', () => { localStorage.clear(); location.reload(); })">🗑️ Limpar Banco</button>
       </div>
     </div>
   </div>
-
 </main>
 
 <div class="toast" id="toast"></div>
@@ -739,7 +619,6 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const dbRef = db.ref('bolao');
 
-// ─── ESTADO ───
 let state = {
   participantes: [],
   jogos: [],
@@ -749,11 +628,8 @@ let state = {
   distribuicao: [60, 30, 10]
 };
 
-function salvar() {
-  dbRef.set(state);
-}
+function salvar() { dbRef.set(state); }
 
-// Escuta mudanças em tempo real
 dbRef.on('value', (snapshot) => {
   const data = snapshot.val();
   if (data) {
@@ -772,7 +648,6 @@ dbRef.on('value', (snapshot) => {
   document.getElementById('loading').style.display = 'none';
 });
 
-// ─── EVENT LISTENERS SECURE INITIALIZATION ───
 document.addEventListener("DOMContentLoaded", () => {
   const jogoDataEl = document.getElementById('jogo-data');
   if (jogoDataEl) jogoDataEl.valueAsDate = new Date();
@@ -807,14 +682,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-  
-  const cfgValorEl = document.getElementById('cfg-valor');
-  if (cfgValorEl) {
-    cfgValorEl.addEventListener('input', atualizarPreviewCfg);
-  }
 });
 
-// ─── NAVIGATE ───
 function showPage(id, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
@@ -823,7 +692,6 @@ function showPage(id, el) {
   renderAll();
 }
 
-// ─── PARTICIPANTES ───
 function adicionarParticipante() {
   const nome = document.getElementById('part-nome').value.trim();
   if (!nome) { toast('❌ Digite um nome'); return; }
@@ -839,7 +707,6 @@ function removerParticipante(id) {
   salvar(); renderAll();
 }
 
-// ─── JOGOS ───
 function adicionarJogo() {
   const t1 = document.getElementById('jogo-time1').value.trim();
   const t2 = document.getElementById('jogo-time2').value.trim();
@@ -862,7 +729,6 @@ function removerJogo(id) {
   });
 }
 
-// ─── PALPITES ───
 function salvarPalpite() {
   const partId = parseInt(document.getElementById('palpite-participante').value);
   const jogoId = parseInt(document.getElementById('palpite-jogo').value);
@@ -875,7 +741,6 @@ function salvarPalpite() {
   salvar(); renderAll(); toast('💾 Palpite salvo!');
 }
 
-// ─── RESULTADO ───
 function salvarResultado() {
   const jogoId = document.getElementById('res-jogo').value;
   if (!jogoId) { toast('❌ Selecione um jogo'); return; }
@@ -892,7 +757,6 @@ function removerResultado() {
   salvar(); renderAll(); toast('↩️ Resultado removido');
 }
 
-// ─── PONTOS ───
 function calcPontos(p, res) {
   if (!res) return null;
   if (p.gol1 === res.gol1 && p.gol2 === res.gol2) return 3;
@@ -914,7 +778,6 @@ function getRanking() {
   }).sort((a, b) => b.pts - a.pts || b.exatos - a.exatos);
 
   const pote = (state.valorEntrada || 0) * state.participantes.length;
-
   if (pote > 0 && ranked.length > 0 && ranked[0].pts > 0) {
     const maxPts = ranked[0].pts;
     const maxExatos = ranked[0].exatos;
@@ -922,21 +785,15 @@ function getRanking() {
     const premioPorPessoa = pote / vencedores.length;
     vencedores.forEach(r => r.premio = premioPorPessoa);
   }
-
   return ranked;
 }
 
-function getPote() {
-  return (state.valorEntrada || 0) * state.participantes.length;
-}
-
-// ─── RENDER ALL ───
 function renderAll() {
   renderParticipantes();
   renderJogos();
   renderSelects();
-  renderRanking();
-  renderPalpites();
+  renderRankingGeral();
+  renderJogoAtualLive();
 }
 
 function renderParticipantes() {
@@ -959,13 +816,13 @@ function renderJogos() {
   const el = document.getElementById('jogos-content');
   if(!el) return;
   if (!state.jogos.length) {
-    el.innerHTML = `<div class="empty"><div class="empty-icon">📋</div><div class="empty-titulo">Sem jogos ainda</div><div class="empty-sub">Adicione jogos no formulário acima.</div></div>`;
+    el.innerHTML = `<div class="empty"><div class="empty-icon">📋</div><div class="empty-titulo">Sem jogos ainda</div><div class="empty-sub">Adicione jogos ao lado.</div></div>`;
     return;
   }
   el.innerHTML = state.jogos.map(j => {
     const res = state.resultados[j.id];
     const statusClass = res ? 'status-finalizado' : 'status-aberto';
-    const statusText  = res ? '✅ Finalizado' : '⏳ Aguardando resultado';
+    const statusText  = res ? '✅ Finalizado' : '⏳ Em Aberto';
     const dataFmt = j.data ? new Date(j.data + 'T12:00:00').toLocaleDateString('pt-BR') : '';
     return `
     <div class="jogo-card">
@@ -995,41 +852,32 @@ function renderSelects() {
     sp.innerHTML = '<option value="">Selecione...</option>' + state.participantes.map(p => `<option value="${p.id}">${p.nome}</option>`).join('');
     sp.value = va;
   }
-
-  const fp = document.getElementById('filtro-part-palpites');
-  if(fp) {
-    const vfp = fp.value;
-    fp.innerHTML = '<option value="">Todos os participantes</option>' + state.participantes.map(p => `<option value="${p.id}">${p.nome}</option>`).join('');
-    fp.value = vfp;
-  }
-
   const sj = document.getElementById('palpite-jogo');
   if(sj) {
     const vj = sj.value;
     sj.innerHTML = '<option value="">Selecione...</option>' + state.jogos.map(j => `<option value="${j.id}">${j.time1} × ${j.time2}</option>`).join('');
     sj.value = vj;
   }
-
   const rj = document.getElementById('res-jogo');
   if(rj) {
     const vrj = rj.value;
     rj.innerHTML = '<option value="">Selecione...</option>' + state.jogos.map(j => `<option value="${j.id}">${j.time1} × ${j.time2}</option>`).join('');
     rj.value = vrj;
   }
-
-  const fj = document.getElementById('filtro-jogo-palpites');
-  if(fj) {
-    const vfj = fj.value;
-    fj.innerHTML = '<option value="">Todos os jogos</option>' + state.jogos.map(j => `<option value="${j.id}">${j.time1} × ${j.time2}</option>`).join('');
-    fj.value = vfj;
+  const flj = document.getElementById('filtro-live-jogo');
+  if(flj) {
+    const vflj = flj.value;
+    flj.innerHTML = '<option value="">Selecione um jogo...</option>' + state.jogos.map(j => `<option value="${j.id}">${j.time1} × ${j.time2} (${j.grupo})</option>`).join('');
+    flj.value = vflj;
   }
 }
 
-function renderRanking() {
+// ─── RENDERS MODIFICADOS PARA TRABALHAR COM SEU PEDIDO ───
+function renderRankingGeral() {
   const ranking = getRanking();
   const totalJogos = state.jogos.length;
   const finalizados = Object.keys(state.resultados).length;
-  const pote = getPote();
+  const pote = (state.valorEntrada || 0) * state.participantes.length;
   const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
   const trophyRow = document.getElementById('trophy-row-container');
@@ -1041,122 +889,114 @@ function renderRanking() {
       </div>
       <div class="trophy-card">
         <div class="trophy-num">${finalizados}/${totalJogos}</div>
-        <div class="trophy-label">Jogos finalizados</div>
+        <div class="trophy-label">Jogos Concluídos</div>
       </div>
       <div class="trophy-card" style="border-color:rgba(245,197,24,.4); background:linear-gradient(135deg,#1c2b22,#2a3a20)">
-        <div class="trophy-num" style="color:var(--ouro);font-size:${pote>=1000?'1.5rem':'2.2rem'}">${fmt(pote)}</div>
-        <div class="trophy-label">💰 Pote Total</div>
+        <div class="trophy-num" style="color:var(--ouro);">${fmt(pote)}</div>
+        <div class="trophy-label">💰 Pote Acumulado</div>
       </div>
     `;
   }
 
-  const premioEl = document.getElementById('premio-card-container');
-  const partEl   = document.getElementById('participantes-card-container');
-  if(!premioEl || !partEl) return;
+  const tbody = document.getElementById('ranking-geral-tbody');
+  if(!tbody) return;
 
-  if (!ranking.length) {
-    premioEl.innerHTML = `<div class="empty"><div class="empty-icon">⚽</div><div class="empty-titulo">Sem participantes</div><div class="empty-sub">Adicione participantes na aba Config.</div></div>`;
-    partEl.innerHTML = '';
+  if(!ranking.length) {
+    tbody.innerHTML = `<tr><td colspan="5" class="empty">Nenhum participante ativo. Adicione em Config.</td></tr>`;
     return;
   }
 
-  const vencedores = ranking.filter(r => r.premio > 0);
-  const temJogosFinalizados = finalizados > 0;
-
-  if (!temJogosFinalizados) {
-    premioEl.innerHTML = `<div class="empty"><div class="empty-icon">⏳</div><div class="empty-titulo">Aguardando resultados</div><div class="empty-sub">Registre os resultados dos jogos para ver o vencedor.</div></div>`;
-  } else if (vencedores.length === 0 || ranking[0].pts === 0) {
-    premioEl.innerHTML = `<div class="empty"><div class="empty-icon">🎯</div><div class="empty-titulo">Nenhum palpite registrado</div><div class="empty-sub">Cadastre palpites na aba Palpites.</div></div>`;
-  } else {
-    const titulo = vencedores.length === 1 ? '🏆 Vencedor do Bolão' : `🤝 Empate — Pote dividido entre ${vencedores.length}`;
-    premioEl.innerHTML = `
-      <div class="card" style="border-color:rgba(46,204,113,.3)">
-        <div class="card-title" style="color:#2ecc71">${titulo}</div>
-        <div style="display:flex;flex-direction:column;gap:12px">
-          ${vencedores.map(r => `
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px;background:var(--card2);border-radius:12px;border:1px solid rgba(46,204,113,.2)">
-              <div style="display:flex;align-items:center;gap:12px">
-                <div style="font-size:2rem">${vencedores.length === 1 ? '🏆' : '🤝'}</div>
-                <div>
-                  <div style="font-weight:700;font-size:1.1rem">${r.nome}</div>
-                  <div style="font-size:.78rem;color:var(--texto2);margin-top:2px">${r.pts} ponto${r.pts!==1?'s':''} · ${r.exatos} placar${r.exatos!==1?'es':''} exato${r.exatos!==1?'s':''}</div>
-                </div>
-              </div>
-              <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:2rem;color:#2ecc71;white-space:nowrap">${fmt(r.premio)}</div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
+  tbody.innerHTML = ranking.map((r, i) => {
+    let classeDestaque = "";
+    if(i === 0 && r.pts > 0) classeDestaque = "highlight-leader";
+    return `
+      <tr class="${classeDestaque}">
+        <td class="rank-pos">${i + 1}º</td>
+        <td class="rank-nome">${r.nome}</td>
+        <td class="rank-stats">🔥 <b>${r.exatos}</b> exatos &nbsp;&nbsp; 🎯 <b>${r.venc}</b> vencedor</td>
+        <td class="rank-money">${r.premio > 0 ? fmt(r.premio) : fmt(0)}</td>
+        <td class="rank-pts">${r.pts} pts</td>
+      </tr>
     `;
-  }
-
-  partEl.innerHTML = `
-    <div class="card">
-      <div class="card-title">👥 Participantes</div>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        ${ranking.map((r, i) => `
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--card2);border-radius:10px">
-            <div style="display:flex;align-items:center;gap:10px">
-              <div class="chip-avatar" style="width:32px;height:32px;font-size:.8rem">${r.nome[0].toUpperCase()}</div>
-              <span style="font-weight:600">${r.nome}</span>
-            </div>
-            <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.2rem;color:${r.pts>0?'var(--ouro)':'var(--texto2)'}">${r.pts} pts</span>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-  `;
+  }).join('');
 }
 
-function renderPalpites() {
-  const el = document.getElementById('palpites-content');
-  if(!el) return;
-  const filtroJogo = document.getElementById('filtro-jogo-palpites').value;
-  const filtroP    = document.getElementById('filtro-part-palpites').value;
+function renderJogoAtualLive() {
+  const containerHeader = document.getElementById('live-jogo-header-container');
+  const containerContent = document.getElementById('live-palpites-content');
+  const jogoId = document.getElementById('filtro-live-jogo')?.value;
 
-  let palpites = [...state.palpites];
-  if (filtroJogo) palpites = palpites.filter(p => p.jogoId == filtroJogo);
-  if (filtroP)    palpites = palpites.filter(p => p.participanteId == filtroP);
+  if(!containerContent || !containerHeader) return;
 
-  if (!palpites.length) {
-    el.innerHTML = `<div class="empty"><div class="empty-icon">🎯</div><div class="empty-titulo">Sem palpites</div><div class="empty-sub">Cadastre palpites na aba Palpites.</div></div>`;
+  if(!jogoId) {
+    containerHeader.innerHTML = '';
+    containerContent.innerHTML = `<div class="empty"><div class="empty-icon">📺</div><div class="empty-titulo">Nenhum Jogo Selecionado</div><div class="empty-sub">Escolha uma partida no seletor acima para ver a auditoria de palpites.</div></div>`;
     return;
   }
 
-  el.innerHTML = `
+  const jogo = state.jogos.find(j => j.id == jogoId);
+  if(!jogo) return;
+
+  const res = state.resultados[jogoId];
+  const statusClass = res ? 'status-finalizado' : 'status-aberto';
+  const statusText  = res ? `Placar Real: ${res.gol1} × ${res.gol2}` : '⏳ Jogo Em Andamento / Aguardando Placar';
+
+  containerHeader.innerHTML = `
+    <div class="card" style="text-align:center; border-color: var(--ouro)">
+      <div style="font-size:0.8rem; text-transform:uppercase; color:var(--ouro); margin-bottom:6px">${jogo.grupo}</div>
+      <div style="font-family:'Barlow Condensed', sans-serif; font-weight:800; font-size:1.6rem; margin-bottom:8px">
+        ${jogo.time1} <span style="color:var(--texto2)">×</span> ${jogo.time2}
+      </div>
+      <span class="status-badge ${statusClass}">${statusText}</span>
+    </div>
+  `;
+
+  // Filtra palpites cadastrados para este jogo específico
+  const palpitesDoJogo = state.palpites.filter(p => p.jogoId == jogoId);
+
+  if(!palpitesDoJogo.length) {
+    containerContent.innerHTML = `<div class="empty"><div class="empty-icon">🎯</div><div class="empty-titulo">Nenhum palpite para este jogo</div><div class="empty-sub">Cadastre as apostas da galera na aba Jogos.</div></div>`;
+    return;
+  }
+
+  containerContent.innerHTML = `
     <div class="palpites-header">
       <div>Participante</div>
-      <div>Jogo</div>
-      <div>Palpite</div>
-      <div style="text-align:center">Pontos</div>
+      <div>Palpite Registrado</div>
+      <div>Condição</div>
+      <div style="text-align:center">Pontos Ganhos</div>
     </div>
-    ${palpites.map(p => {
+    ${palpitesDoJogo.map(p => {
       const part = state.participantes.find(x => x.id === p.participanteId);
-      const jogo = state.jogos.find(x => x.id === p.jogoId);
-      if (!part || !jogo) return '';
-      const res = state.resultados[p.jogoId];
+      if(!part) return '';
+      
       const pts = calcPontos(p, res);
       const ptClass = pts === 3 ? 'pontos-3' : pts === 1 ? 'pontos-1' : pts === 0 ? 'pontos-0' : 'pontos-?';
-      const ptLabel = pts !== null ? pts : '–';
+      
+      let labelCondicao = "Aguardando Real";
+      if(pts === 3) labelCondicao = "Placar Exato! 🔥";
+      else if(pts === 1) labelCondicao = "Acertou Vencedor 🎯";
+      else if(pts === 0) labelCondicao = "Errou o resultado ❌";
+
       return `
         <div class="palpite-row">
           <div style="display:flex;align-items:center;gap:8px">
             <div class="chip-avatar" style="width:26px;height:26px;font-size:.72rem;flex-shrink:0">${part.nome[0].toUpperCase()}</div>
             <span style="font-size:.88rem; font-weight:600;">${part.nome}</span>
           </div>
-          <div style="font-size:.82rem;color:var(--texto2)">${jogo.time1} × ${jogo.time2}</div>
           <div class="palpite-placar">
-            <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.1rem">${p.gol1}</span>
-            <span style="color:var(--texto2);font-size:.85rem">×</span>
-            <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.1rem">${p.gol2}</span>
+            <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.2rem;color:var(--branco)">${p.gol1}</span>
+            <span style="color:var(--texto2)">×</span>
+            <span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.2rem;color:var(--branco)">${p.gol2}</span>
           </div>
-          <div><span class="pontos-badge ${ptClass}">${ptLabel}</span></div>
-        </div>`;
+          <div style="font-size:0.8rem; color:var(--texto2)">${labelCondicao}</div>
+          <div style="text-align:center"><span class="pontos-badge ${ptClass}">${pts !== null ? pts : '–'}</span></div>
+        </div>
+      `;
     }).join('')}
   `;
 }
 
-// ─── CONFIG BOLÃO ───
 function salvarConfigBolao() {
   const v = parseFloat(document.getElementById('cfg-valor').value) || 0;
   state.valorEntrada = v;
@@ -1176,18 +1016,15 @@ function atualizarPreviewCfg() {
   if (v <= 0) { prev.innerHTML = ''; return; }
   prev.innerHTML = n > 0
     ? `<span style="color:var(--ouro);font-weight:600">Pote atual: ${fmt(pote)}</span> com ${n} participante${n>1?'s':''}`
-    : `<span style="color:var(--texto2)">Adicione participantes para ver o pote</span>`;
+    : `<span style="color:var(--texto2)">Adicione participantes para calcular o pote</span>`;
 }
 
-// ─── MODAL CONFIRM ───
 function modalConfirm(msg, onOk) {
   document.getElementById('modal-msg').textContent = msg;
   document.getElementById('modal-overlay').style.display = 'flex';
   document.getElementById('modal-ok').onclick = () => { fecharModal(); onOk(); };
 }
-function fecharModal() {
-  document.getElementById('modal-overlay').style.display = 'none';
-}
+function fecharModal() { document.getElementById('modal-overlay').style.display = 'none'; }
 
 function exportarDados() {
   const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
@@ -1212,7 +1049,6 @@ function lerImport(e) {
   e.target.value = '';
 }
 
-// ─── TOAST ───
 function toast(msg) {
   const t = document.getElementById('toast');
   if(!t) return;
