@@ -292,10 +292,7 @@
     <div id="trophy-row-container" class="trophy-row"></div>
     
     <div class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
-        <div class="card-title" style="margin-bottom: 0;">💰 Balanço Monetário Líquido (Lucro / Prejuízo)</div>
-        <button class="btn btn-primary btn-sm" onclick="copiarExtratoWhatsApp()">📋 Copiar Extrato para WhatsApp</button>
-      </div>
+      <div class="card-title">💰 Balanço Monetário Líquido (Lucro / Prejuízo)</div>
       <div style="overflow-x: auto;">
         <table class="ranking-table">
           <thead>
@@ -329,10 +326,7 @@
     <div id="live-jogo-vencedores-container"></div>
 
     <div class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
-        <div class="card-title" style="margin-bottom: 0;">🎯 Grade de Rateio e Palpites</div>
-        <button class="btn btn-primary btn-sm" id="btn-whats-jogo" onclick="copiarJogoWhatsApp()" style="display: none;">📺 Copiar Resumo do Jogo</button>
-      </div>
+      <div class="card-title">🎯 Grade de Rateio e Palpites</div>
       <div id="live-palpites-content"></div>
     </div>
   </div>
@@ -466,4 +460,479 @@ const firebaseConfig = {
   authDomain: "bolao-copa-69a5b.firebaseapp.com",
   databaseURL: "https://bolao-copa-69a5b-default-rtdb.firebaseio.com",
   projectId: "bolao-copa-69a5b",
-  sto
+  storageBucket: "bolao-copa-69a5b.firebasestorage.app",
+  messagingSenderId: "243356737111",
+  appId: "1:243356737111:web:9fc299a86da530aee04d12"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const dbRef = db.ref('bolao_valores');
+
+let state = { participantes: [], jogos: [], palpites: [], resultados: {} };
+
+function salvar() { dbRef.set(state); }
+
+dbRef.on('value', (snapshot) => {
+  const data = snapshot.val();
+  if (data) {
+    state = {
+      participantes: data.participantes || [],
+      jogos:         data.jogos         || [],
+      palpites:      data.palpites      || [],
+      resultados:    data.resultados    || {}
+    };
+  }
+  renderAll();
+  document.getElementById('loading').style.display = 'none';
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (document.getElementById('jogo-data')) document.getElementById('jogo-data').valueAsDate = new Date();
+
+  document.getElementById('palpite-jogo')?.addEventListener('change', (e) => {
+    const jId = e.target.value;
+    const row = document.getElementById('palpite-placar-row');
+    if (!jId) { if(row) row.style.display = 'none'; return; }
+    const j = state.jogos.find(x => x.id == jId);
+    if (j) {
+      document.getElementById('palpite-time1-label').textContent = j.time1;
+      document.getElementById('palpite-time2-label').textContent = j.time2;
+      if(row) row.style.display = 'flex';
+    }
+  });
+
+  document.getElementById('res-jogo')?.addEventListener('change', (e) => {
+    const jId = e.target.value;
+    if (!jId) return;
+    const j = state.jogos.find(x => x.id == jId);
+    if (j) {
+      document.getElementById('res-time1-label').textContent = j.time1;
+      document.getElementById('res-time2-label').textContent = j.time2;
+      const r = state.resultados[jId];
+      document.getElementById('res-gol1').value = r ? r.gol1 : 0;
+      document.getElementById('res-gol2').value = r ? r.gol2 : 0;
+    }
+  });
+});
+
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  el.classList.add('active');
+  renderAll();
+}
+
+function checarPalpiteExistente() {
+  const partId = parseInt(document.getElementById('palpite-participante').value);
+  const jogoId = parseInt(document.getElementById('palpite-jogo').value);
+  const alerta = document.getElementById('alerta-aposta-existente');
+  if(!alerta) return;
+
+  if(!partId || !jogoId) { alerta.style.display = 'none'; return; }
+
+  const pExistente = state.palpites.find(p => p.participanteId === partId && p.jogoId === jogoId);
+  if(pExistente) {
+    const statusTxt = pExistente.pago ? "PAGA" : "PENDENTE";
+    alerta.innerHTML = `⚠️ <b>Atenção:</b> Este participante já apostou <b>${pExistente.gol1} × ${pExistente.gol2}</b> com valor de <b>R$ ${pExistente.dinheiro.toFixed(2)}</b> [${statusTxt}]. Salvar novamente irá atualizar a cota.`;
+    alerta.style.display = 'block';
+    document.getElementById('palpite-gol1').value = pExistente.gol1;
+    document.getElementById('palpite-gol2').value = pExistente.gol2;
+    document.getElementById('palpite-dinheiro').value = pExistente.dinheiro;
+    document.getElementById('palpite-pago').checked = pExistente.pago !== false;
+  } else {
+    alerta.style.display = 'none';
+    document.getElementById('palpite-gol1').value = 0;
+    document.getElementById('palpite-gol2').value = 0;
+    document.getElementById('palpite-dinheiro').value = 10;
+    document.getElementById('palpite-pago').checked = true;
+  }
+}
+
+function calcularMatrizFinanceira() {
+  let balanco = {};
+  state.participantes.forEach(p => { balanco[p.id] = { investido: 0, ganho: 0, saldo: 0 }; });
+
+  state.jogos.forEach(j => {
+    const res = state.resultados[j.id];
+    const palpitesDoJogo = state.palpites.filter(p => p.jogoId == j.id);
+    
+    let poteDoJogo = 0;
+    palpitesDoJogo.forEach(p => {
+      if(balanco[p.participanteId]) {
+        balanco[p.participanteId].investido += p.dinheiro;
+        poteDoJogo += p.dinheiro;
+      }
+    });
+
+    if (!res) return; 
+
+    let acertaramPlacarExato = [];
+    let acertaramVencedor = [];
+
+    palpitesDoJogo.forEach(p => {
+      const acertouExato = p.gol1 === res.gol1 && p.gol2 === res.gol2;
+      const vencP = Math.sign(p.gol1 - p.gol2);
+      const vencR = Math.sign(res.gol1 - res.gol2);
+      const acertouVencedor = vencP === vencR;
+
+      if(acertouExato) acertaramPlacarExato.push(p);
+      else if(acertouVencedor) acertaramVencedor.push(p);
+    });
+
+    if (acertaramPlacarExato.length > 0) {
+      let somaApostasGanhadoras = acertaramPlacarExato.reduce((a, b) => a + b.dinheiro, 0);
+      acertaramPlacarExato.forEach(p => {
+        let proporcao = p.dinheiro / somaApostasGanhadoras;
+        if(balanco[p.participanteId]) balanco[p.participanteId].ganho += (poteDoJogo * proporcao);
+      });
+    } else if (acertaramVencedor.length > 0) {
+      let somaApostasGanhadoras = acertaramVencedor.reduce((a, b) => a + b.dinheiro, 0);
+      acertaramVencedor.forEach(p => {
+        let proporcao = p.dinheiro / somaApostasGanhadoras;
+        if(balanco[p.participanteId]) balanco[p.participanteId].ganho += (poteDoJogo * proporcao);
+      });
+    } else {
+      palpitesDoJogo.forEach(p => {
+        if(balanco[p.participanteId]) balanco[p.participanteId].ganho += p.dinheiro;
+      });
+    }
+  });
+
+  state.participantes.forEach(p => {
+    if(balanco[p.id]) balanco[p.id].saldo = balanco[p.id].ganho - balanco[p.id].investido;
+  });
+
+  return balanco;
+}
+
+function adicionarParticipante() {
+  const nome = document.getElementById('part-nome').value.trim();
+  if (!nome) return;
+  state.participantes.push({ id: Date.now(), nome });
+  document.getElementById('part-nome').value = '';
+  salvar(); renderAll();
+}
+
+function salvarPalpite() {
+  const partId = parseInt(document.getElementById('palpite-participante').value);
+  const jogoId = parseInt(document.getElementById('palpite-jogo').value);
+  const g1 = parseInt(document.getElementById('palpite-gol1').value) || 0;
+  const g2 = parseInt(document.getElementById('palpite-gol2').value) || 0;
+  const grana = parseFloat(document.getElementById('palpite-dinheiro').value) || 0;
+  const jaPago = document.getElementById('palpite-pago').checked;
+
+  if (!partId || !jogoId || grana <= 0) { toast('❌ Escolha o participante, jogo e o valor.'); return; }
+
+  const idx = state.palpites.findIndex(p => p.participanteId === partId && p.jogoId === jogoId);
+  const objAposta = { participanteId: partId, jogoId: jogoId, gol1: g1, gol2: g2, dinheiro: grana, pago: jaPago };
+  
+  if (idx >= 0) state.palpites[idx] = objAposta;
+  else state.palpites.push(objAposta);
+
+  salvar(); renderAll(); toast('💾 Aposta em dinheiro registrada!');
+  document.getElementById('alerta-aposta-existente').style.display = 'none';
+}
+
+function removerParticipante(id) {
+  state.participantes = state.participantes.filter(p => p.id !== id);
+  state.palpites = state.palpites.filter(p => p.participanteId !== id);
+  salvar(); renderAll();
+}
+
+function adicionarJogo() {
+  const t1 = document.getElementById('jogo-time1').value.trim();
+  const t2 = document.getElementById('jogo-time2').value.trim();
+  const g  = document.getElementById('jogo-grupo').value.trim() || 'Geral';
+  const d  = document.getElementById('jogo-data').value;
+  if (!t1 || !t2) return;
+  state.jogos.push({ id: Date.now(), time1: t1, time2: t2, grupo: g, data: d });
+  document.getElementById('jogo-time1').value = ''; document.getElementById('jogo-time2').value = '';
+  salvar(); renderAll();
+}
+
+function removerJogo(id) {
+  state.jogos = state.jogos.filter(j => j.id !== id);
+  state.palpites = state.palpites.filter(p => p.jogoId !== id);
+  delete state.resultados[id];
+  salvar(); renderAll();
+}
+
+function salvarResultado() {
+  const jogoId = document.getElementById('res-jogo').value;
+  if (!jogoId) return;
+  const g1 = parseInt(document.getElementById('res-gol1').value) || 0;
+  const g2 = parseInt(document.getElementById('res-gol2').value) || 0;
+  state.resultados[jogoId] = { gol1: g1, gol2: g2 };
+  salvar(); renderAll(); toast('✅ Caixa liquidado!');
+}
+
+function removerResultado() {
+  const jogoId = document.getElementById('res-jogo').value;
+  if (!jogoId) return;
+  delete state.resultados[jogoId];
+  salvar(); renderAll(); toast('↩️ Estorno concluído');
+}
+
+function renderAll() {
+  renderParticipantes();
+  renderJogos();
+  renderSelects();
+  renderExtratoGeral();
+  renderJogoAtualLive();
+}
+
+function renderParticipantes() {
+  const el = document.getElementById('participantes-lista');
+  if(!el) return;
+  el.innerHTML = state.participantes.map(p => `
+    <div class="participante-chip">
+      <div class="chip-avatar">${p.nome[0].toUpperCase()}</div>
+      <span>${p.nome}</span>
+      <button class="chip-remove" onclick="removerParticipante(${p.id})">×</button>
+    </div>
+  `).join('');
+}
+
+function renderJogos() {
+  const el = document.getElementById('jogos-content');
+  if(!el) return;
+  if(!state.jogos.length) { el.innerHTML = `<div class="empty">Nenhum jogo criado.</div>`; return; }
+  
+  el.innerHTML = state.jogos.map(j => {
+    const res = state.resultados[j.id];
+    const palpitesDoJogo = state.palpites.filter(p => p.jogoId == j.id);
+    const totalPoteJogo = palpitesDoJogo.reduce((acc, curr) => acc + parseFloat(curr.dinheiro || 0), 0);
+
+    return `
+    <div class="jogo-card">
+      <div class="jogo-header">
+        <span class="jogo-grupo">${j.grupo}</span>
+        <span style="color:var(--ouro); font-weight:700">Pote total: R$ ${totalPoteJogo.toFixed(2)}</span>
+        <button class="btn btn-danger btn-sm" onclick="removerJogo(${j.id})">🗑️</button>
+      </div>
+      <div class="placar-row">
+        <div class="time-nome">${j.time1}</div>
+        <div class="placar-inputs">
+          <span class="placar-input" style="background:var(--bg);border:1px solid rgba(255,255,255,.1);border-radius:8px;display:inline-block">${res ? res.gol1 : '–'}</span>
+          <span class="placar-sep">×</span>
+          <span class="placar-input" style="background:var(--bg);border:1px solid rgba(255,255,255,.1);border-radius:8px;display:inline-block">${res ? res.gol2 : '–'}</span>
+        </div>
+        <div class="time-nome right">${j.time2}</div>
+      </div>
+      <span class="status-badge ${res ? 'status-finalizado' : 'status-aberto'}">${res ? '✅ Fechado e Pago' : '⏳ Aberto a Apostas'}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderSelects() {
+  const sp = document.getElementById('palpite-participante');
+  if(sp) { const va = sp.value; sp.innerHTML = '<option value="">Selecione...</option>' + state.participantes.map(p => `<option value="${p.id}">${p.nome}</option>`).join(''); sp.value = va; }
+  const sj = document.getElementById('palpite-jogo');
+  if(sj) { const vj = sj.value; sj.innerHTML = '<option value="">Selecione...</option>' + state.jogos.map(j => `<option value="${j.id}">${j.time1} × ${j.time2}</option>`).join(''); sj.value = vj; }
+  const rj = document.getElementById('res-jogo');
+  if(rj) { const vrj = rj.value; rj.innerHTML = '<option value="">Selecione...</option>' + state.jogos.map(j => `<option value="${j.id}">${j.time1} × ${j.time2}</option>`).join(''); rj.value = vrj; }
+  const flj = document.getElementById('filtro-live-jogo');
+  if(flj) { const vflj = flj.value; flj.innerHTML = '<option value="">Selecione uma partida...</option>' + state.jogos.map(j => `<option value="${j.id}">${j.time1} × ${j.time2}</option>`).join(''); flj.value = vflj; }
+}
+
+function renderExtratoGeral() {
+  const matriz = calcularMatrizFinanceira();
+  const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  
+  let totalMovimentado = 0;
+  state.palpites.forEach(p => totalMovimentado += parseFloat(p.dinheiro || 0));
+
+  const trophyRow = document.getElementById('trophy-row-container');
+  if(trophyRow) {
+    trophyRow.innerHTML = `
+      <div class="trophy-card">
+        <div class="trophy-num">${state.participantes.length}</div>
+        <div class="trophy-label">Apostadores</div>
+      </div>
+      <div class="trophy-card" style="border-color:rgba(46,204,113,.4); background:linear-gradient(135deg,#1c2b22,#153a20)">
+        <div class="trophy-num" style="color:#2ecc71">${fmt(totalMovimentado)}</div>
+        <div class="trophy-label">Total em Caixa (Geral)</div>
+      </div>
+    `;
+  }
+
+  const tbody = document.getElementById('ranking-geral-tbody');
+  if(!tbody) return;
+
+  const listaRankeada = state.participantes.map(p => ({ ...p, ...matriz[p.id] })).sort((a,b) => b.saldo - a.saldo);
+
+  if(!listaRankeada.length) { tbody.innerHTML = `<tr><td colspan="5" class="empty">Sem movimentações em caixa.</td></tr>`; return; }
+
+  tbody.innerHTML = listaRankeada.map((r, i) => {
+    const classeSaldo = r.saldo > 0 ? 'val-positivo' : r.saldo < 0 ? 'val-negativo' : '';
+    return `
+      <tr>
+        <td class="rank-pos">${i + 1}º</td>
+        <td class="rank-nome">${r.nome}</td>
+        <td class="rank-stats">Investido: ${fmt(r.investido || 0)}</td>
+        <td style="text-align:right">${fmt(r.ganho || 0)}</td>
+        <td style="text-align:right" class="${classeSaldo}">${r.saldo > 0 ? '+' : ''}${fmt(r.saldo || 0)}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderJogoAtualLive() {
+  const containerHeader = document.getElementById('live-jogo-header-container');
+  const containerVencedores = document.getElementById('live-jogo-vencedores-container');
+  const containerContent = document.getElementById('live-palpites-content');
+  const jogoId = document.getElementById('filtro-live-jogo')?.value;
+
+  if(!containerContent || !containerHeader || !containerVencedores) return;
+  if(!jogoId) {
+    containerHeader.innerHTML = '';
+    containerVencedores.innerHTML = '';
+    containerContent.innerHTML = `<div class="empty">Selecione uma partida no menu acima.</div>`;
+    return;
+  }
+
+  const j = state.jogos.find(x => x.id == jogoId);
+  const res = state.resultados[jogoId];
+  const palpitesDoJogo = state.palpites.filter(p => p.jogoId == j.id);
+  const totalPote = palpitesDoJogo.reduce((acc, curr) => acc + parseFloat(curr.dinheiro || 0), 0);
+  const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+  containerHeader.innerHTML = `
+    <div class="card" style="text-align:center; border-color: var(--ouro)">
+      <div style="font-family:'Barlow Condensed', sans-serif; font-weight:800; font-size:1.6rem; margin-bottom:8px">
+        ${j.time1} × ${j.time2}
+      </div>
+      <div style="font-size:1.1rem; color:#2ecc71; font-weight:700">Pote Acumulado: ${fmt(totalPote)}</div>
+      <span class="status-badge ${res ? 'status-finalizado' : 'status-aberto'}" style="margin-top:10px">
+        ${res ? `Resultado Oficial: ${res.gol1} × ${res.gol2}` : '⏳ Em Aberto (Aguardando Placar Final)'}
+      </span>
+    </div>
+  `;
+
+  if(!palpitesDoJogo.length) {
+    containerVencedores.innerHTML = '';
+    containerContent.innerHTML = `<div class="empty">Nenhuma aposta casada neste jogo ainda.</div>`;
+    return;
+  }
+
+  let acertaramExato = [];
+  let acertaramVencedor = [];
+  if(res) {
+    palpitesDoJogo.forEach(p => {
+      if(p.gol1 === res.gol1 && p.gol2 === res.gol2) acertaramExato.push(p);
+      else if(Math.sign(p.gol1 - p.gol2) === Math.sign(res.gol1 - res.gol2)) acertaramVencedor.push(p);
+    });
+  }
+
+  // MODIFICAÇÃO AQUI: Ajustado para mostrar o Retorno Bruto (Rateio + Cota própria investida)
+  if (res) {
+    let tipoCriterio = "";
+    let listaPremiados = [];
+    let somaApostasGanhadoras = 0;
+
+    if (acertaramExato.length > 0) {
+      tipoCriterio = "🎯 Ganhadores por Placar Exato";
+      listaPremiados = acertaramExato;
+      somaApostasGanhadoras = acertaramExato.reduce((a, b) => a + parseFloat(b.dinheiro || 0), 0);
+    } else if (acertaramVencedor.length > 0) {
+      tipoCriterio = "🎯 Ganhadores por Vencedor/Empate (Ninguém cravou o placar)";
+      listaPremiados = acertaramVencedor;
+      somaApostasGanhadoras = acertaramVencedor.reduce((a, b) => a + parseFloat(b.dinheiro || 0), 0);
+    }
+
+    if (listaPremiados.length > 0) {
+      containerVencedores.innerHTML = `
+        <div class="card" style="border-color: rgba(46,204,113,.4); background: rgba(46,204,113,0.02)">
+          <div class="card-title" style="color:#2ecc71; font-size:1.05rem">${tipoCriterio}</div>
+          <div style="display:flex; flex-direction:column; gap:10px">
+            ${listaPremiados.map(p => {
+              const part = state.participantes.find(x => x.id === p.participanteId);
+              // Cálculo do retorno bruto completo (Incluso o investimento inicial)
+              let fatiaDoPremio = totalPote * (p.dinheiro / somaApostasGanhadoras);
+              return `
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:var(--card2); border-radius:8px; border-left: 3px solid #2ecc71">
+                  <span style="font-weight:700">${part ? part.nome : 'Apostador'}</span>
+                  <span style="font-family:'Barlow Condensed', sans-serif; font-weight:800; font-size:1.3rem; color:#2ecc71">Faturou: ${fmt(fatiaDoPremio)}</span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    } else {
+      containerVencedores.innerHTML = `
+        <div class="card" style="border-color: var(--texto2); text-align:center; font-size:0.9rem; color:var(--texto2)">
+          ❌ Ninguém pontuou neste jogo. Todo o dinheiro investido foi <b>reembolsado</b> integralmente aos apostadores.
+        </div>
+      `;
+    }
+  } else {
+    containerVencedores.innerHTML = '';
+  }
+
+  containerContent.innerHTML = `
+    <div class="palpites-header">
+      <div>Participante</div>
+      <div>Placar Apostado</div>
+      <div>Valor Casado (% Cota)</div>
+      <div style="text-align:right">Balanço Líquido</div>
+    </div>
+    ${palpitesDoJogo.map(p => {
+      const part = state.participantes.find(x => x.id === p.participanteId);
+      if(!part) return '';
+      
+      let retornoBruto = 0;
+      let badgeClass = "fin-neutro";
+      let labelStatus = "Aberto";
+      
+      const percentualCota = totalPote > 0 ? ((p.dinheiro / totalPote) * 100).toFixed(1) : 0;
+      
+      const pagoStatus = p.pago !== false;
+      const badgePagamentoHtml = pagoStatus 
+        ? `<span class="badge-pagamento pag-pado">Pago</span>` 
+        : `<span class="badge-pagamento pag-pendente">Pendente</span>`;
+
+      if(res) {
+        if(acertaramExato.length > 0) {
+          if(p.gol1 === res.gol1 && p.gol2 === res.gol2) {
+            retornoBruto = totalPote * (p.dinheiro / acertaramExato.reduce((a,b)=>a+parseFloat(b.dinheiro||0),0));
+          }
+        } else if(acertaramVencedor.length > 0) {
+          if(Math.sign(p.gol1 - p.gol2) === Math.sign(res.gol1 - res.gol2)) {
+            retornoBruto = totalPote * (p.dinheiro / acertaramVencedor.reduce((a,b)=>a+parseFloat(b.dinheiro||0),0));
+          }
+        } else {
+          retornoBruto = p.dinheiro; 
+        }
+        
+        let lucroLiquido = retornoBruto - p.dinheiro;
+        if(lucroLiquido > 0) { badgeClass = "fin-lucro"; labelStatus = `+${fmt(lucroLiquido)}`; }
+        else if(lucroLiquido < 0) { badgeClass = "fin-perda"; labelStatus = `${fmt(lucroLiquido)}`; }
+        else { badgeClass = "fin-neutro"; labelStatus = "Reembolso"; }
+      }
+
+      return `
+        <div class="palpite-row">
+          <div>
+            <span style="font-weight:600;">${part.nome}</span>
+            ${badgePagamentoHtml}
+          </div>
+          <div class="palpite-placar"><span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.1rem">${p.gol1} × ${p.gol2}</span></div>
+          <div style="font-family:'Barlow Condensed', sans-serif; font-weight:600; color:var(--texto2)">
+            ${fmt(p.dinheiro)} <span style="font-size:0.75rem; font-weight:400; color:var(--ouro)">(${percentualCota}%)</span>
+          </div>
+          <div style="text-align:right"><span class="badge-financeira ${badgeClass}">${labelStatus}</span></div>
+        </div>
+      `;
+    }).join('')}
+  `;
+}
+
+function modalConfirm(msg, onOk) { document.getElementById('modal-msg').textContent = msg; document.getElementById('modal-overlay').style.display = 'flex'; document.getElementById('modal-ok').onclick = () => { fecharModal(); onOk(); }; }
+function fecharModal() { document.getElementById('modal-overlay').style.display = 'none'; }
+function toast(msg) { const t = document.getElementById('toast'); if(!t) return; t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2600); }
+</script>
+</body>
+</html>
