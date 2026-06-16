@@ -175,8 +175,6 @@
   .jogo-card:hover { border-color: rgba(245,197,24,.2); }
   .jogo-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
   .jogo-grupo { font-size: 0.72rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--ouro); background: rgba(245,197,24,.1); padding: 3px 10px; border-radius: 12px; }
-  .jogo-data { font-size: 0.78rem; color: var(--texto2); }
-  .placar-row { display: flex; align-items: center; gap: 12px; }
   .time-nome { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.5px; flex: 1; }
   .time-nome.right { text-align: right; }
   .placar-inputs { display: flex; align-items: center; gap: 8px; }
@@ -188,7 +186,7 @@
 
   .palpites-header {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1.2fr 1fr 1fr 1fr;
     gap: 8px;
     padding: 8px 16px;
     font-size: 0.72rem;
@@ -201,7 +199,7 @@
   }
   .palpite-row {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1.2fr 1fr 1fr 1fr;
     gap: 8px;
     padding: 10px 16px;
     border-radius: 8px;
@@ -277,7 +275,6 @@
 
 <main>
 
-  <!-- ────────── EXTRATO GERAL ────────── -->
   <div id="page-ranking" class="page active">
     <div id="trophy-row-container" class="trophy-row"></div>
     
@@ -300,7 +297,6 @@
     </div>
   </div>
 
-  <!-- ────────── DETALHE DO JOGO ATUAL ────────── -->
   <div id="page-jogo-atual" class="page">
     <div class="card">
       <div class="card-title">📺 Auditoria Financeira do Jogo</div>
@@ -321,22 +317,23 @@
     </div>
   </div>
 
-  <!-- ────────── JOGOS E PALPITES ────────── -->
   <div id="page-jogos" class="page">
     <div class="grid2">
-      <!-- Cadastrar Palpites com Valor Customizado -->
       <div class="card">
         <div class="card-title">🎯 Cadastrar Palpite e Investimento</div>
         <div class="form-row">
           <div class="form-group">
             <label>Participante</label>
-            <select id="palpite-participante"><option value="">Selecione...</option></select>
+            <select id="palpite-participante" onchange="checarPalpiteExistente()"><option value="">Selecione...</option></select>
           </div>
           <div class="form-group">
             <label>Jogo</label>
-            <select id="palpite-jogo"><option value="">Selecione...</option></select>
+            <select id="palpite-jogo" onchange="checarPalpiteExistente()"><option value="">Selecione...</option></select>
           </div>
         </div>
+        
+        <div id="alerta-aposta-existente" style="display:none; margin-bottom:12px; font-size:0.82rem; color:var(--ouro); background:rgba(245,197,24,0.08); padding:10px; border-radius:6px;"></div>
+
         <div class="form-row" id="palpite-placar-row" style="display:none; flex-direction:column; gap:14px">
           <div style="display:flex; gap:12px; align-items:center">
             <div class="form-group">
@@ -357,7 +354,6 @@
         </div>
       </div>
 
-      <!-- Criar Partidas -->
       <div class="card">
         <div class="card-title">➕ Criar Novo Jogo</div>
         <div class="form-row">
@@ -378,7 +374,6 @@
     </div>
   </div>
 
-  <!-- ────────── CONFIGURAR RESULTADOS REAL ────────── -->
   <div id="page-config" class="page">
     <div class="grid2">
       <div class="card">
@@ -509,7 +504,29 @@ function showPage(id, el) {
   renderAll();
 }
 
-// ─── ALGORITMO MONETÁRIO DE RATEIO ───
+function checarPalpiteExistente() {
+  const partId = parseInt(document.getElementById('palpite-participante').value);
+  const jogoId = parseInt(document.getElementById('palpite-jogo').value);
+  const alerta = document.getElementById('alerta-aposta-existente');
+  if(!alerta) return;
+
+  if(!partId || !jogoId) { alerta.style.display = 'none'; return; }
+
+  const pExistente = state.palpites.find(p => p.participanteId === partId && p.jogoId === jogoId);
+  if(pExistente) {
+    alerta.innerHTML = `⚠️ <b>Atenção:</b> Este participante já apostou <b>${pExistente.gol1} × ${pExistente.gol2}</b> neste jogo com o valor de <b>R$ ${pExistente.dinheiro.toFixed(2)}</b>. Salvar novamente irá atualizar a cota antiga.`;
+    alerta.style.display = 'block';
+    document.getElementById('palpite-gol1').value = pExistente.gol1;
+    document.getElementById('palpite-gol2').value = pExistente.gol2;
+    document.getElementById('palpite-dinheiro').value = pExistente.dinheiro;
+  } else {
+    alerta.style.display = 'none';
+    document.getElementById('palpite-gol1').value = 0;
+    document.getElementById('palpite-gol2').value = 0;
+    document.getElementById('palpite-dinheiro').value = 10;
+  }
+}
+
 function calcularMatrizFinanceira() {
   let balanco = {};
   state.participantes.forEach(p => { balanco[p.id] = { investido: 0, ganho: 0, saldo: 0 }; });
@@ -599,7 +616,6 @@ function removerJogo(id) {
   salvar(); renderAll();
 }
 
-// CORREÇÃO AQUI: Gravando e associando o jogoId perfeitamente ao estado global do Firebase
 function salvarPalpite() {
   const partId = parseInt(document.getElementById('palpite-participante').value);
   const jogoId = parseInt(document.getElementById('palpite-jogo').value);
@@ -615,7 +631,8 @@ function salvarPalpite() {
   if (idx >= 0) state.palpites[idx] = objAposta;
   else state.palpites.push(objAposta);
 
-  salvar(); renderAll(); toast('💾 Aposta em dinheiro salva!');
+  salvar(); renderAll(); toast('💾 Aposta em dinheiro registrada!');
+  document.getElementById('alerta-aposta-existente').style.display = 'none';
 }
 
 function salvarResultado() {
@@ -786,7 +803,7 @@ function renderJogoAtualLive() {
     <div class="palpites-header">
       <div>Participante</div>
       <div>Placar Apostado</div>
-      <div>Valor Casado</div>
+      <div>Valor Casado (% Cota)</div>
       <div style="text-align:right">Balanço Líquido</div>
     </div>
     ${palpitesDoJogo.map(p => {
@@ -796,6 +813,9 @@ function renderJogoAtualLive() {
       let retornoBruto = 0;
       let badgeClass = "fin-neutro";
       let labelStatus = "Aberto";
+      
+      // Cálculo do peso percentual da cota dele no jogo atual
+      const percentualCota = totalPote > 0 ? ((p.dinheiro / totalPote) * 100).toFixed(1) : 0;
 
       if(res) {
         if(acertaramExato.length > 0) {
@@ -820,7 +840,9 @@ function renderJogoAtualLive() {
         <div class="palpite-row">
           <div><span style="font-weight:600;">${part.nome}</span></div>
           <div class="palpite-placar"><span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.1rem">${p.gol1} × ${p.gol2}</span></div>
-          <div style="font-family:'Barlow Condensed', sans-serif; font-weight:600; color:var(--texto2)">${fmt(p.dinheiro)}</div>
+          <div style="font-family:'Barlow Condensed', sans-serif; font-weight:600; color:var(--texto2)">
+            ${fmt(p.dinheiro)} <span style="font-size:0.75rem; font-weight:400; color:var(--ouro)">(${percentualCota}%)</span>
+          </div>
           <div style="text-align:right"><span class="badge-financeira ${badgeClass}">${labelStatus}</span></div>
         </div>
       `;
