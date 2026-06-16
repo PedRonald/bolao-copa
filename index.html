@@ -186,7 +186,7 @@
 
   .palpites-header {
     display: grid;
-    grid-template-columns: 1.2fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     gap: 8px;
     padding: 8px 16px;
     font-size: 0.72rem;
@@ -199,7 +199,7 @@
   }
   .palpite-row {
     display: grid;
-    grid-template-columns: 1.2fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     gap: 8px;
     padding: 10px 16px;
     border-radius: 8px;
@@ -220,6 +220,20 @@
   .fin-lucro { background: rgba(46,204,113,.15); color: #2ecc71; }
   .fin-perda { background: rgba(231,76,60,.12); color: var(--erro); }
   .fin-neutro { background: rgba(255,255,255,.05); color: var(--texto2); }
+
+  /* Etiquetas de Status do Pagamento */
+  .badge-pagamento {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    display: inline-block;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .pag-pado { background: rgba(46,204,113, 0.2); color: #2ecc71; border: 1px solid rgba(46,204,113, 0.4); }
+  .pag-pendente { background: rgba(231,76,60, 0.15); color: #e74c3c; border: 1px solid rgba(231,76,60, 0.3); }
 
   .ranking-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
   .ranking-table th { font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--texto2); padding: 12px 16px; text-align: left; border-bottom: 1px solid rgba(255,255,255,.08); }
@@ -275,6 +289,7 @@
 
 <main>
 
+  <!-- ────────── EXTRATO GERAL ────────── -->
   <div id="page-ranking" class="page active">
     <div id="trophy-row-container" class="trophy-row"></div>
     
@@ -297,6 +312,7 @@
     </div>
   </div>
 
+  <!-- ────────── DETALHE DO JOGO ATUAL ────────── -->
   <div id="page-jogo-atual" class="page">
     <div class="card">
       <div class="card-title">📺 Auditoria Financeira do Jogo</div>
@@ -310,7 +326,6 @@
     </div>
 
     <div id="live-jogo-header-container"></div>
-    
     <div id="live-jogo-vencedores-container"></div>
 
     <div class="card">
@@ -319,8 +334,10 @@
     </div>
   </div>
 
+  <!-- ────────── JOGOS E PALPITES ────────── -->
   <div id="page-jogos" class="page">
     <div class="grid2">
+      <!-- Cadastrar Palpites -->
       <div class="card">
         <div class="card-title">🎯 Cadastrar Palpite e Investimento</div>
         <div class="form-row">
@@ -352,10 +369,18 @@
             <label>Valor que deseja apostar NESTE jogo (R$)</label>
             <input type="number" id="palpite-dinheiro" min="1" step="0.50" value="10" style="width:100%" />
           </div>
+          
+          <!-- NOVO: Campo de Verificação de Pagamento -->
+          <div class="form-group" style="flex-direction:row; gap:8px; align-items:center; margin-top:4px; margin-bottom:4px">
+            <input type="checkbox" id="palpite-pago" style="width:18px; height:18px; cursor:pointer;" checked />
+            <label for="palpite-pago" style="cursor:pointer; font-size:0.85rem; text-transform:none; color:var(--texto)">Aposta Já Foi Paga?</label>
+          </div>
+
           <button class="btn btn-primary" onclick="salvarPalpite()">💾 Registrar Aposta</button>
         </div>
       </div>
 
+      <!-- Criar Partidas -->
       <div class="card">
         <div class="card-title">➕ Criar Novo Jogo</div>
         <div class="form-row">
@@ -376,6 +401,7 @@
     </div>
   </div>
 
+  <!-- ────────── CONFIGURAR RESULTADOS REAL ────────── -->
   <div id="page-config" class="page">
     <div class="grid2">
       <div class="card">
@@ -516,16 +542,19 @@ function checarPalpiteExistente() {
 
   const pExistente = state.palpites.find(p => p.participanteId === partId && p.jogoId === jogoId);
   if(pExistente) {
-    alerta.innerHTML = `⚠️ <b>Atenção:</b> Este participante já apostou <b>${pExistente.gol1} × ${pExistente.gol2}</b> neste jogo com o valor de <b>R$ ${pExistente.dinheiro.toFixed(2)}</b>. Salvar novamente irá atualizar a cota antiga.`;
+    const statusTxt = pExistente.pago ? "PAGA" : "PENDENTE";
+    alerta.innerHTML = `⚠️ <b>Atenção:</b> Este participante já apostou <b>${pExistente.gol1} × ${pExistente.gol2}</b> com valor de <b>R$ ${pExistente.dinheiro.toFixed(2)}</b> [${statusTxt}]. Salvar novamente irá atualizar a cota.`;
     alerta.style.display = 'block';
     document.getElementById('palpite-gol1').value = pExistente.gol1;
     document.getElementById('palpite-gol2').value = pExistente.gol2;
     document.getElementById('palpite-dinheiro').value = pExistente.dinheiro;
+    document.getElementById('palpite-pago').checked = pExistente.pago !== false;
   } else {
     alerta.style.display = 'none';
     document.getElementById('palpite-gol1').value = 0;
     document.getElementById('palpite-gol2').value = 0;
     document.getElementById('palpite-dinheiro').value = 10;
+    document.getElementById('palpite-pago').checked = true;
   }
 }
 
@@ -594,6 +623,27 @@ function adicionarParticipante() {
   salvar(); renderAll();
 }
 
+// CORREÇÃO: Forçando tratamento correto de Float/Boolean para evitar erros na contabilidade geral
+function salvarPalpite() {
+  const partId = parseInt(document.getElementById('palpite-participante').value);
+  const jogoId = parseInt(document.getElementById('palpite-jogo').value);
+  const g1 = parseInt(document.getElementById('palpite-gol1').value) || 0;
+  const g2 = parseInt(document.getElementById('palpite-gol2').value) || 0;
+  const grana = parseFloat(document.getElementById('palpite-dinheiro').value) || 0;
+  const jaPago = document.getElementById('palpite-pago').checked;
+
+  if (!partId || !jogoId || grana <= 0) { toast('❌ Escolha o participante, jogo e o valor.'); return; }
+
+  const idx = state.palpites.findIndex(p => p.participanteId === partId && p.jogoId === jogoId);
+  const objAposta = { participanteId: partId, jogoId: jogoId, gol1: g1, gol2: g2, dinheiro: grana, pago: jaPago };
+  
+  if (idx >= 0) state.palpites[idx] = objAposta;
+  else state.palpites.push(objAposta);
+
+  salvar(); renderAll(); toast('💾 Aposta em dinheiro registrada!');
+  document.getElementById('alerta-aposta-existente').style.display = 'none';
+}
+
 function removerParticipante(id) {
   state.participantes = state.participantes.filter(p => p.id !== id);
   state.palpites = state.palpites.filter(p => p.participanteId !== id);
@@ -616,25 +666,6 @@ function removerJogo(id) {
   state.palpites = state.palpites.filter(p => p.jogoId !== id);
   delete state.resultados[id];
   salvar(); renderAll();
-}
-
-function salvarPalpite() {
-  const partId = parseInt(document.getElementById('palpite-participante').value);
-  const jogoId = parseInt(document.getElementById('palpite-jogo').value);
-  const g1 = parseInt(document.getElementById('palpite-gol1').value) || 0;
-  const g2 = parseInt(document.getElementById('palpite-gol2').value) || 0;
-  const grana = parseFloat(document.getElementById('palpite-dinheiro').value) || 0;
-
-  if (!partId || !jogoId || grana <= 0) { toast('❌ Escolha o participante, jogo e o valor.'); return; }
-
-  const idx = state.palpites.findIndex(p => p.participanteId === partId && p.jogoId === jogoId);
-  const objAposta = { participanteId: partId, jogoId: jogoId, gol1: g1, gol2: g2, dinheiro: grana };
-  
-  if (idx >= 0) state.palpites[idx] = objAposta;
-  else state.palpites.push(objAposta);
-
-  salvar(); renderAll(); toast('💾 Aposta em dinheiro registrada!');
-  document.getElementById('alerta-aposta-existente').style.display = 'none';
 }
 
 function salvarResultado() {
@@ -681,7 +712,7 @@ function renderJogos() {
   el.innerHTML = state.jogos.map(j => {
     const res = state.resultados[j.id];
     const palpitesDoJogo = state.palpites.filter(p => p.jogoId == j.id);
-    const totalPoteJogo = palpitesDoJogo.reduce((acc, curr) => acc + curr.dinheiro, 0);
+    const totalPoteJogo = palpitesDoJogo.reduce((acc, curr) => acc + parseFloat(curr.dinheiro || 0), 0);
 
     return `
     <div class="jogo-card">
@@ -720,7 +751,7 @@ function renderExtratoGeral() {
   const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   
   let totalMovimentado = 0;
-  state.palpites.forEach(p => totalMovimentado += p.dinheiro);
+  state.palpites.forEach(p => totalMovimentado += parseFloat(p.dinheiro || 0));
 
   const trophyRow = document.getElementById('trophy-row-container');
   if(trophyRow) {
@@ -774,7 +805,7 @@ function renderJogoAtualLive() {
   const j = state.jogos.find(x => x.id == jogoId);
   const res = state.resultados[jogoId];
   const palpitesDoJogo = state.palpites.filter(p => p.jogoId == jogoId);
-  const totalPote = palpitesDoJogo.reduce((acc, curr) => acc + curr.dinheiro, 0);
+  const totalPote = palpitesDoJogo.reduce((acc, curr) => acc + parseFloat(curr.dinheiro || 0), 0);
   const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
   containerHeader.innerHTML = `
@@ -795,10 +826,8 @@ function renderJogoAtualLive() {
     return;
   }
 
-  // ─── FILTRAGEM DE ACERTOS PARA O PAINEL DE GANHADORES ───
   let acertaramExato = [];
   let acertaramVencedor = [];
-  
   if(res) {
     palpitesDoJogo.forEach(p => {
       if(p.gol1 === res.gol1 && p.gol2 === res.gol2) acertaramExato.push(p);
@@ -806,7 +835,6 @@ function renderJogoAtualLive() {
     });
   }
 
-  // Monta a estrutura de quem levou o jogo e quanto embolsou
   if (res) {
     let tipoCriterio = "";
     let listaPremiados = [];
@@ -815,11 +843,11 @@ function renderJogoAtualLive() {
     if (acertaramExato.length > 0) {
       tipoCriterio = "🎯 Ganhadores por Placar Exato";
       listaPremiados = acertaramExato;
-      somaApostasGanhadoras = acertaramExato.reduce((a, b) => a + b.dinheiro, 0);
+      somaApostasGanhadoras = acertaramExato.reduce((a, b) => a + parseFloat(b.dinheiro || 0), 0);
     } else if (acertaramVencedor.length > 0) {
       tipoCriterio = "🎯 Ganhadores por Vencedor/Empate (Ninguém cravou o placar)";
       listaPremiados = acertaramVencedor;
-      somaApostasGanhadoras = acertaramVencedor.reduce((a, b) => a + b.dinheiro, 0);
+      somaApostasGanhadoras = acertaramVencedor.reduce((a, b) => a + parseFloat(b.dinheiro || 0), 0);
     }
 
     if (listaPremiados.length > 0) {
@@ -848,10 +876,10 @@ function renderJogoAtualLive() {
       `;
     }
   } else {
-    containerVencedores.innerHTML = ''; // Jogo aberto não exibe painel de campeões
+    containerVencedores.innerHTML = '';
   }
 
-  // ─── GRADE GERAL DETALHADA COM COTA (%) ───
+  // ─── GRADE GERAL DETALHADA COM STATUS DE PAGAMENTO ───
   containerContent.innerHTML = `
     <div class="palpites-header">
       <div>Participante</div>
@@ -868,15 +896,21 @@ function renderJogoAtualLive() {
       let labelStatus = "Aberto";
       
       const percentualCota = totalPote > 0 ? ((p.dinheiro / totalPote) * 100).toFixed(1) : 0;
+      
+      // Montagem do selo de confirmação de pagamento
+      const pagoStatus = p.pago !== false;
+      const badgePagamentoHtml = pagoStatus 
+        ? `<span class="badge-pagamento pag-pado">Pago</span>` 
+        : `<span class="badge-pagamento pag-pendente">Pendente</span>`;
 
       if(res) {
         if(acertaramExato.length > 0) {
           if(p.gol1 === res.gol1 && p.gol2 === res.gol2) {
-            retornoBruto = totalPote * (p.dinheiro / acertaramExato.reduce((a,b)=>a+b.dinheiro,0));
+            retornoBruto = totalPote * (p.dinheiro / acertaramExato.reduce((a,b)=>a+parseFloat(b.dinheiro||0),0));
           }
         } else if(acertaramVencedor.length > 0) {
           if(Math.sign(p.gol1 - p.gol2) === Math.sign(res.gol1 - res.gol2)) {
-            retornoBruto = totalPote * (p.dinheiro / acertaramVencedor.reduce((a,b)=>a+b.dinheiro,0));
+            retornoBruto = totalPote * (p.dinheiro / acertaramVencedor.reduce((a,b)=>a+parseFloat(b.dinheiro||0),0));
           }
         } else {
           retornoBruto = p.dinheiro; 
@@ -890,7 +924,10 @@ function renderJogoAtualLive() {
 
       return `
         <div class="palpite-row">
-          <div><span style="font-weight:600;">${part.nome}</span></div>
+          <div>
+            <span style="font-weight:600;">${part.nome}</span>
+            ${badgePagamentoHtml}
+          </div>
           <div class="palpite-placar"><span style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.1rem">${p.gol1} × ${p.gol2}</span></div>
           <div style="font-family:'Barlow Condensed', sans-serif; font-weight:600; color:var(--texto2)">
             ${fmt(p.dinheiro)} <span style="font-size:0.75rem; font-weight:400; color:var(--ouro)">(${percentualCota}%)</span>
