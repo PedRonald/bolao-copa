@@ -310,6 +310,8 @@
     </div>
 
     <div id="live-jogo-header-container"></div>
+    
+    <div id="live-jogo-vencedores-container"></div>
 
     <div class="card">
       <div class="card-title">🎯 Grade de Rateio e Palpites</div>
@@ -757,12 +759,14 @@ function renderExtratoGeral() {
 
 function renderJogoAtualLive() {
   const containerHeader = document.getElementById('live-jogo-header-container');
+  const containerVencedores = document.getElementById('live-jogo-vencedores-container');
   const containerContent = document.getElementById('live-palpites-content');
   const jogoId = document.getElementById('filtro-live-jogo')?.value;
 
-  if(!containerContent || !containerHeader) return;
+  if(!containerContent || !containerHeader || !containerVencedores) return;
   if(!jogoId) {
     containerHeader.innerHTML = '';
+    containerVencedores.innerHTML = '';
     containerContent.innerHTML = `<div class="empty">Selecione uma partida no menu acima.</div>`;
     return;
   }
@@ -786,12 +790,15 @@ function renderJogoAtualLive() {
   `;
 
   if(!palpitesDoJogo.length) {
+    containerVencedores.innerHTML = '';
     containerContent.innerHTML = `<div class="empty">Nenhuma aposta casada neste jogo ainda.</div>`;
     return;
   }
 
+  // ─── FILTRAGEM DE ACERTOS PARA O PAINEL DE GANHADORES ───
   let acertaramExato = [];
   let acertaramVencedor = [];
+  
   if(res) {
     palpitesDoJogo.forEach(p => {
       if(p.gol1 === res.gol1 && p.gol2 === res.gol2) acertaramExato.push(p);
@@ -799,6 +806,52 @@ function renderJogoAtualLive() {
     });
   }
 
+  // Monta a estrutura de quem levou o jogo e quanto embolsou
+  if (res) {
+    let tipoCriterio = "";
+    let listaPremiados = [];
+    let somaApostasGanhadoras = 0;
+
+    if (acertaramExato.length > 0) {
+      tipoCriterio = "🎯 Ganhadores por Placar Exato";
+      listaPremiados = acertaramExato;
+      somaApostasGanhadoras = acertaramExato.reduce((a, b) => a + b.dinheiro, 0);
+    } else if (acertaramVencedor.length > 0) {
+      tipoCriterio = "🎯 Ganhadores por Vencedor/Empate (Ninguém cravou o placar)";
+      listaPremiados = acertaramVencedor;
+      somaApostasGanhadoras = acertaramVencedor.reduce((a, b) => a + b.dinheiro, 0);
+    }
+
+    if (listaPremiados.length > 0) {
+      containerVencedores.innerHTML = `
+        <div class="card" style="border-color: rgba(46,204,113,.4); background: rgba(46,204,113,0.02)">
+          <div class="card-title" style="color:#2ecc71; font-size:1.05rem">${tipoCriterio}</div>
+          <div style="display:flex; flex-direction:column; gap:10px">
+            ${listaPremiados.map(p => {
+              const part = state.participantes.find(x => x.id === p.participanteId);
+              let fatiaDoPremio = totalPote * (p.dinheiro / somaApostasGanhadoras);
+              return `
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:var(--card2); border-radius:8px; border-left: 3px solid #2ecc71">
+                  <span style="font-weight:700">${part ? part.nome : 'Apostador'}</span>
+                  <span style="font-family:'Barlow Condensed', sans-serif; font-weight:800; font-size:1.3rem; color:#2ecc71">Faturou: ${fmt(fatiaDoPremio)}</span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    } else {
+      containerVencedores.innerHTML = `
+        <div class="card" style="border-color: var(--texto2); text-align:center; font-size:0.9rem; color:var(--texto2)">
+          ❌ Ninguém pontuou neste jogo. Todo o dinheiro investido foi <b>reembolsado</b> integralmente aos apostadores.
+        </div>
+      `;
+    }
+  } else {
+    containerVencedores.innerHTML = ''; // Jogo aberto não exibe painel de campeões
+  }
+
+  // ─── GRADE GERAL DETALHADA COM COTA (%) ───
   containerContent.innerHTML = `
     <div class="palpites-header">
       <div>Participante</div>
@@ -814,7 +867,6 @@ function renderJogoAtualLive() {
       let badgeClass = "fin-neutro";
       let labelStatus = "Aberto";
       
-      // Cálculo do peso percentual da cota dele no jogo atual
       const percentualCota = totalPote > 0 ? ((p.dinheiro / totalPote) * 100).toFixed(1) : 0;
 
       if(res) {
