@@ -186,7 +186,7 @@
 
   .palpites-header {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1.2fr 1fr 1fr 1fr;
     gap: 8px;
     padding: 8px 16px;
     font-size: 0.72rem;
@@ -199,7 +199,7 @@
   }
   .palpite-row {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1.2fr 1fr 1fr 1fr;
     gap: 8px;
     padding: 10px 16px;
     border-radius: 8px;
@@ -221,7 +221,6 @@
   .fin-perda { background: rgba(231,76,60,.12); color: var(--erro); }
   .fin-neutro { background: rgba(255,255,255,.05); color: var(--texto2); }
 
-  /* Etiquetas de Status do Pagamento */
   .badge-pagamento {
     font-size: 0.65rem;
     font-weight: 700;
@@ -289,7 +288,6 @@
 
 <main>
 
-  <!-- ────────── EXTRATO GERAL ────────── -->
   <div id="page-ranking" class="page active">
     <div id="trophy-row-container" class="trophy-row"></div>
     
@@ -312,7 +310,6 @@
     </div>
   </div>
 
-  <!-- ────────── DETALHE DO JOGO ATUAL ────────── -->
   <div id="page-jogo-atual" class="page">
     <div class="card">
       <div class="card-title">📺 Auditoria Financeira do Jogo</div>
@@ -334,10 +331,8 @@
     </div>
   </div>
 
-  <!-- ────────── JOGOS E PALPITES ────────── -->
   <div id="page-jogos" class="page">
     <div class="grid2">
-      <!-- Cadastrar Palpites -->
       <div class="card">
         <div class="card-title">🎯 Cadastrar Palpite e Investimento</div>
         <div class="form-row">
@@ -370,7 +365,6 @@
             <input type="number" id="palpite-dinheiro" min="1" step="0.50" value="10" style="width:100%" />
           </div>
           
-          <!-- NOVO: Campo de Verificação de Pagamento -->
           <div class="form-group" style="flex-direction:row; gap:8px; align-items:center; margin-top:4px; margin-bottom:4px">
             <input type="checkbox" id="palpite-pago" style="width:18px; height:18px; cursor:pointer;" checked />
             <label for="palpite-pago" style="cursor:pointer; font-size:0.85rem; text-transform:none; color:var(--texto)">Aposta Já Foi Paga?</label>
@@ -380,7 +374,6 @@
         </div>
       </div>
 
-      <!-- Criar Partidas -->
       <div class="card">
         <div class="card-title">➕ Criar Novo Jogo</div>
         <div class="form-row">
@@ -401,7 +394,6 @@
     </div>
   </div>
 
-  <!-- ────────── CONFIGURAR RESULTADOS REAL ────────── -->
   <div id="page-config" class="page">
     <div class="grid2">
       <div class="card">
@@ -623,7 +615,6 @@ function adicionarParticipante() {
   salvar(); renderAll();
 }
 
-// CORREÇÃO: Forçando tratamento correto de Float/Boolean para evitar erros na contabilidade geral
 function salvarPalpite() {
   const partId = parseInt(document.getElementById('palpite-participante').value);
   const jogoId = parseInt(document.getElementById('palpite-jogo').value);
@@ -804,7 +795,7 @@ function renderJogoAtualLive() {
 
   const j = state.jogos.find(x => x.id == jogoId);
   const res = state.resultados[jogoId];
-  const palpitesDoJogo = state.palpites.filter(p => p.jogoId == jogoId);
+  const palpitesDoJogo = state.palpites.filter(p => p.jogoId == j.id);
   const totalPote = palpitesDoJogo.reduce((acc, curr) => acc + parseFloat(curr.dinheiro || 0), 0);
   const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -835,6 +826,7 @@ function renderJogoAtualLive() {
     });
   }
 
+  // MODIFICAÇÃO AQUI: Ajustado para mostrar o Retorno Bruto (Rateio + Cota própria investida)
   if (res) {
     let tipoCriterio = "";
     let listaPremiados = [];
@@ -857,6 +849,7 @@ function renderJogoAtualLive() {
           <div style="display:flex; flex-direction:column; gap:10px">
             ${listaPremiados.map(p => {
               const part = state.participantes.find(x => x.id === p.participanteId);
+              // Cálculo do retorno bruto completo (Incluso o investimento inicial)
               let fatiaDoPremio = totalPote * (p.dinheiro / somaApostasGanhadoras);
               return `
                 <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:var(--card2); border-radius:8px; border-left: 3px solid #2ecc71">
@@ -879,7 +872,6 @@ function renderJogoAtualLive() {
     containerVencedores.innerHTML = '';
   }
 
-  // ─── GRADE GERAL DETALHADA COM STATUS DE PAGAMENTO ───
   containerContent.innerHTML = `
     <div class="palpites-header">
       <div>Participante</div>
@@ -897,7 +889,6 @@ function renderJogoAtualLive() {
       
       const percentualCota = totalPote > 0 ? ((p.dinheiro / totalPote) * 100).toFixed(1) : 0;
       
-      // Montagem do selo de confirmação de pagamento
       const pagoStatus = p.pago !== false;
       const badgePagamentoHtml = pagoStatus 
         ? `<span class="badge-pagamento pag-pado">Pago</span>` 
