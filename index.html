@@ -245,6 +245,7 @@
 
 <main>
 
+  <!-- EXTRATO GERAL -->
   <div id="page-ranking" class="page active">
     <div id="trophy-row-container" class="trophy-row"></div>
     <div class="card">
@@ -269,6 +270,7 @@
     </div>
   </div>
 
+  <!-- JOGO ATUAL -->
   <div id="page-jogo-atual" class="page">
     <div class="card">
       <div class="card-title">📺 Detalhe da Partida</div>
@@ -292,6 +294,7 @@
     </div>
   </div>
 
+  <!-- APOSTAS / JOGOS -->
   <div id="page-jogos" class="page">
     <div class="grid2">
       <div class="card">
@@ -346,6 +349,7 @@
     </div>
   </div>
 
+  <!-- CONFIG -->
   <div id="page-config" class="page">
     <div class="grid2">
       <div class="card">
@@ -800,7 +804,6 @@ function renderJogoAtualLive() {
   const ganhadores = exatos.length > 0 ? exatos : vencedor.length > 0 ? vencedor : (res ? palpitesJogo : []);
   const somaGanhadores = ganhadores.reduce((a, p) => a + (p.dinheiro || 0), 0);
 
-  // NOVO: Render do Painel de Ganhadores com Retorno Total Bruto
   if (res) {
     let tituloPainel = "";
     if (exatos.length > 0) tituloPainel = "🎯 Ganhadores (Placar Exato)";
@@ -869,7 +872,7 @@ function renderJogoAtualLive() {
   `;
 }
 
-// ── NOVO: EXPORTAÇÃO COMPATÍVEL COM COMPARTILHAMENTO DO WHATSAPP ──
+// ── EXPORTAÇÃO ATUALIZADA: ADICIONADO HISTÓRICO DE PLACARES NO RELATÓRIO DO WHATSAPP ──
 function copiarExtratoWhatsApp() {
   const matriz = calcularMatriz();
   const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -891,7 +894,24 @@ function copiarExtratoWhatsApp() {
     msg += `*${i + 1}º ${r.nome}*\n`;
     msg += `  • Investido: ${fmt(r.investido)}\n`;
     msg += `  • Retorno: ${fmt(r.ganho)}\n`;
-    msg += `  • Balanço: *${indicador}${fmt(r.saldo)}*\n\n`;
+    msg += `  • Balanço: *${indicador}${fmt(r.saldo)}*\n`;
+    
+    // Busca os palpites deste participante específico
+    const palpitesDele = state.palpites.filter(p => p.participanteId === r.id);
+    if (palpitesDele.length > 0) {
+      msg += `  • _Palpites:_ \n`;
+      palpitesDele.forEach(p => {
+        const jogo = state.jogos.find(j => j.id === p.jogoId);
+        if (jogo) {
+          const resultadoOficial = state.resultados[jogo.id];
+          const txtResultado = resultadoOficial ? ` (Oficial: ${resultadoOficial.gol1}x${resultadoOficial.gol2})` : ' (Em aberto)';
+          msg += `    - ${jogo.time1} ${p.gol1}x${p.gol2} ${jogo.time2}${txtResultado}\n`;
+        }
+      });
+    } else {
+      msg += `  • _Nenhum palpite cadastrado_\n`;
+    }
+    msg += `\n`;
   });
 
   navigator.clipboard.writeText(msg).then(() => toast("📋 Relatório copiado para o WhatsApp!"));
