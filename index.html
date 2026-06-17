@@ -872,7 +872,7 @@ function renderJogoAtualLive() {
   `;
 }
 
-// ── EXPORTAÇÃO ATUALIZADA: ADICIONADO HISTÓRICO DE PLACARES NO RELATÓRIO DO WHATSAPP ──
+// ── EXPORTAÇÃO MODIFICADA: ADICIONADO INDICADOR DE SE JÁ FOI PAGO OU NÃO NO WHATSAPP ──
 function copiarExtratoWhatsApp() {
   const matriz = calcularMatriz();
   const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -891,12 +891,13 @@ function copiarExtratoWhatsApp() {
 
   lista.forEach((r, i) => {
     const indicador = r.saldo > 0 ? '📈 +' : r.saldo < 0 ? '📉 ' : '⚪ ';
-    msg += `*${i + 1}º ${r.nome}*\n`;
+    const statusPagamento = r.pagou ? '🟢 Pago' : '⏳ Pendente'; // <-- Busca o status dinâmico de pagamento do participante
+    
+    msg += `*${i + 1}º ${r.nome}* [${statusPagamento}]\n`;
     msg += `  • Investido: ${fmt(r.investido)}\n`;
     msg += `  • Retorno: ${fmt(r.ganho)}\n`;
     msg += `  • Balanço: *${indicador}${fmt(r.saldo)}*\n`;
     
-    // Busca os palpites deste participante específico
     const palpitesDele = state.palpites.filter(p => p.participanteId === r.id);
     if (palpitesDele.length > 0) {
       msg += `  • _Palpites:_ \n`;
